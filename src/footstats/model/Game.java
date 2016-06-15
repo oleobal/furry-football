@@ -99,7 +99,7 @@ public class Game
 	public static void main(String[] args)
 	{
 		Game g = new Game("../data/2013-11-03_tromso_stromsgodset_first.csv");
-		Thermap m = new Thermap(15, g.getSnapshots());
+		Thermap m = new Thermap(2, g.getSnapshots());
 		System.out.println(m);
 	}
 
