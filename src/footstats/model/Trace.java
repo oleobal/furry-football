@@ -5,39 +5,39 @@ package footstats.model;
  */
 public class Trace
 {
-	public final Integer player;
+	public final int player;
 	/**
 	 * current location
 	 */
-	public final Float posX, posY;
+	public final float posX, posY;
 
 	/**
 	 * direction we're facing
 	 */
-	public final Float heading;
+	public final float heading;
 
 	/**
 	 * direction we're going
 	 */
-	public final Float direction;
+	public final float direction;
 
 	/**
 	 * consumed energy
 	 */
-	public final Float energy;
+	public final float energy;
 
 	/**
 	 * in fraction of the speed of light
 	 */
-	public final Float speed;
+	public final float speed;
 
 	/**
 	 * distance travelled since start of match
 	 */
-	public final Float totalDistance;
+	public final float totalDistance;
 
 
-	public Trace(Integer p, Float x, Float y, Float h, Float d, Float e, Float s, Float td)
+	public Trace(int p, float x, float y, float h, float d, float e, float s, float td)
 	{
 		player = p;
 		posX = x;

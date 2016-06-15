@@ -11,7 +11,7 @@ import java.util.*;
 
 public class Game
 {
-	ArrayList<Snapshot> snapshots;
+	private ArrayList<Snapshot> snapshots;
 
 	/**
 	 * just dump the source file as input
@@ -86,9 +86,21 @@ public class Game
 		System.out.println("Finished in " + (System.currentTimeMillis() - start) + " ms. " + snapshots.size() + " snapshot entries added.");
 	}
 	
+	/**
+	 * returns a copy
+	 */
+	public ArrayList<Snapshot> getSnapshots()
+	{
+		@SuppressWarnings("unchecked")
+		ArrayList<Snapshot> lol = (ArrayList<Snapshot>)snapshots.clone();
+		return lol;
+	}
+	
 	public static void main(String[] args)
 	{
-		Game g = new Game("data/2013-11-03_tromso_stromsgodset_first.csv");
+		Game g = new Game("../data/2013-11-03_tromso_stromsgodset_first.csv");
+		Thermap m = new Thermap(15, g.getSnapshots());
+		System.out.println(m);
 	}
 
 }
