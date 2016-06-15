@@ -51,4 +51,16 @@ public class Trace
 
 
 	}
+	
+	public String toString()
+	{
+		return "Player " + player +
+			   "\n	 Position X:               " + posX +
+			   "\n	 Position Y:               " + posY +
+			   "\n	 Direction facée:          " + heading +
+			   "\n	 Direction de déplacement: " + direction +
+			   "\n	 Energie:                  " + energy +
+			   "\n	 Vitesse:                  " + speed +
+			   "\n	 Déplacement total:        " + totalDistance + "\n";
+	}
 }
