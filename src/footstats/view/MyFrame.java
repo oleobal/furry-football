@@ -5,11 +5,17 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import com.jme3.system.AppSettings;
+import com.jme3.system.JmeCanvasContext;
+
 public class MyFrame extends JFrame
 {
 	JPanel threeDpanel, controlPanel, trianglePane, sliderPane;
 	JButton buttonPlay, buttonLoad;
 	JSlider sliderProgress;
+	
+	FieldView threeDView;
+	Canvas    canvas;
 
 	public MyFrame(String title)
 	{
@@ -57,10 +63,30 @@ public class MyFrame extends JFrame
 		threeDpanel.setPreferredSize(new Dimension(500,500));
 		trianglePane.add(buttonPlay);
 		
-		contentPane.add(threeDpanel, BorderLayout.CENTER);
+		//contentPane.add(threeDpanel, BorderLayout.CENTER);
 		contentPane.add(controlPanel, BorderLayout.SOUTH);
 		
-
+		
+		AppSettings settings = new AppSettings(true);
+		settings.setResolution(1280, 800);
+		settings.setSamples(8);
+		
+		threeDView = new FieldView();
+		
+		threeDView.setSettings(settings);
+		threeDView.setDisplayStatView(false);
+		threeDView.setDisplayFps(false);
+		threeDView.setShowSettings(false);
+		
+		threeDView.createCanvas(); // create canvas!
+		threeDView.setPauseOnLostFocus(false);
+		
+		JmeCanvasContext ctx = (JmeCanvasContext) threeDView.getContext();
+		canvas = ctx.getCanvas();
+		Dimension dim = new Dimension(settings.getWidth(), settings.getHeight());
+		canvas.setPreferredSize(dim);
+		
+		contentPane.add(canvas, BorderLayout.CENTER);
 		
 		this.setContentPane(contentPane);
 		this.pack();
