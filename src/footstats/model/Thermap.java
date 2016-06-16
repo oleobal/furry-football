@@ -41,7 +41,6 @@ public class Thermap
 			lol = i.getTraceOfPlayer(player);
 			if (lol != null) //joueur not found
 			{
-				System.err.println(lol.posX+" "+lol.posY);
 				if (lol.posX>=0 && lol.posX<105 && lol.posY>=0 && lol.posY<68) // banc de touche = osef
 				{
 					//System.err.println(i.getTimestamp()+"  "+terrain[(int)lol.posX][(int)lol.posY]);
