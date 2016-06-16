@@ -98,13 +98,23 @@ public class Game
 		return lol;
 	}
 	
+	public Snapshot getSnapshotByIndex(int i)
+	{
+		return snapshots.get(i);
+	}
+	
+	public int getSnapshotCount()
+	{
+		return snapshots.size();
+	}
+	
 	public static void main(String[] args)
 	{		
-		Game g = new Game("../data/2013-11-03_tromso_stromsgodset_first.csv");
+		/*Game g = new Game("../data/2013-11-03_tromso_stromsgodset_first.csv");
 		Thermap m = new Thermap(2, g.getSnapshots());
-		System.out.println(m);
+		System.out.println(m);*/
 		
-		MyFrame frame = new MyFrame("Lenny");
+		MyFrame frame = new MyFrame("FootStats");
 	}
 
 }

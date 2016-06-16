@@ -11,7 +11,7 @@ import com.jme3.system.JmeCanvasContext;
 public class MyFrame extends JFrame
 {
 	JPanel threeDpanel, controlPanel, trianglePane, sliderPane;
-	JButton buttonPlay, buttonLoad;
+	JButton buttonPlay, buttonFastForward, buttonLoad;
 	JSlider sliderProgress;
 	
 	FieldView threeDView;
@@ -20,7 +20,7 @@ public class MyFrame extends JFrame
 	public MyFrame(String title)
 	{
 		super(title);
-		this.setPreferredSize(new Dimension(1066, 625));
+		this.setPreferredSize(new Dimension(800, 625));
 		this.setResizable(true);
 		this.setLocation(200,200);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,22 +36,24 @@ public class MyFrame extends JFrame
 		controlPanel = new JPanel();
 		controlPanel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
 		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-		buttonPlay = new JButton("▶");
+		buttonPlay = new JButton("Play");
 		buttonPlay.setFont(new Font("Arial", Font.PLAIN, 40));
 		buttonPlay.addActionListener(new ActionListener()
 		{
 				public void actionPerformed(ActionEvent e)
 				{
-					if(buttonPlay.getText().equals("▋▋"))
+					if(buttonPlay.getText().equals("Pause"))
 					{
-						buttonPlay.setText("▶");
+						buttonPlay.setText("Play");
 					}
 					else
 					{
-						buttonPlay.setText("▋▋");
+						buttonPlay.setText("Pause");
 					}
 				}
 		});
+		buttonFastForward = new JButton(">>");
+		buttonFastForward.setFont(buttonPlay.getFont());
 		buttonLoad = new JButton("LOAD");
 		sliderProgress = new JSlider(0,1000);
 		
@@ -62,13 +64,12 @@ public class MyFrame extends JFrame
 		controlPanel.add(sliderPane);
 		threeDpanel.setPreferredSize(new Dimension(500,500));
 		trianglePane.add(buttonPlay);
+		trianglePane.add(buttonFastForward);
 		
-		//contentPane.add(threeDpanel, BorderLayout.CENTER);
 		contentPane.add(controlPanel, BorderLayout.SOUTH);
 		
 		
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(1280, 800);
 		settings.setSamples(8);
 		
 		threeDView = new FieldView();
@@ -83,8 +84,6 @@ public class MyFrame extends JFrame
 		
 		JmeCanvasContext ctx = (JmeCanvasContext) threeDView.getContext();
 		canvas = ctx.getCanvas();
-		Dimension dim = new Dimension(settings.getWidth(), settings.getHeight());
-		canvas.setPreferredSize(dim);
 		
 		contentPane.add(canvas, BorderLayout.CENTER);
 		

@@ -13,9 +13,15 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 
+import footstats.model.*;
+
 public class FieldView extends SimpleApplication {
 
 	private Geometry cube1, cube2, cube3;
+	
+	private Game test;
+	private int i;
+	private float timer;
 	
 	@Override
 	public void simpleInitApp() {		
@@ -58,8 +64,20 @@ public class FieldView extends SimpleApplication {
 		chaseCam.setRotationSpeed(10);
 		chaseCam.setMinVerticalRotation((float) Math.PI/12);
 		chaseCam.setMaxVerticalRotation((float) (Math.PI/2));
-		chaseCam.setMinDistance(2.5f);
+		chaseCam.setMinDistance(5f);
 		chaseCam.setMaxDistance(150);
+		
+		// Default camera position and orientation
+		chaseCam.setDefaultVerticalRotation((float)(Math.PI/2-0.0001)); // directly perpendicular
+		chaseCam.setDefaultHorizontalRotation((float)(Math.PI/2));      // horizontally aligned
+		chaseCam.setDefaultDistance(100);
+		
+		chaseCam.setDownRotateOnCloseViewOnly(false);
+		chaseCam.setSmoothMotion(true);
+		
+		test = new Game("../data/2013-11-03_tromso_stromsgodset_first.csv");
+		i = 0;
+		timer = 0;
 	}
 	
 	@Override
@@ -68,5 +86,17 @@ public class FieldView extends SimpleApplication {
 		cube1.rotate(2*tpf, 2*tpf, tpf);
 		cube2.rotate(-2*tpf, 5*tpf, tpf);
 		cube3.rotate(2*tpf, -2*tpf, 7*tpf);
+		
+		// Test of positioning of a player using data from game
+		if(i < test.getSnapshotCount() && timer > 50)
+		{
+			Snapshot s = test.getSnapshotByIndex(i);
+			Trace y = s.getTraceOfPlayer(8);
+			if(y != null)
+				cube1.setLocalTranslation(y.posX - 105/2, 0, y.posY - 68/2);
+			i++;
+			timer = 0;
+		}
+		timer += 1000*tpf;
 	}
 }
