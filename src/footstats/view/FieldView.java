@@ -15,20 +15,30 @@ import com.jme3.system.AppSettings;
 
 import footstats.model.*;
 
-public class FieldView extends SimpleApplication {
+import javax.swing.JSlider;
+
+public class FieldView extends SimpleApplication
+{
+	private MyFrame theFrame;
 
 	private Geometry cube1, cube2, cube3;
+	private Geometry[] cube;
 	
+	;
 	private Game test;
 	private int i;
 	private float timer;
+	int playbackRate;
+	boolean playbackPaused;
 	
 	@Override
-	public void simpleInitApp() {		
+	public void simpleInitApp()
+	{		
 		Box b = new Box(1, 1, 1);
 		cube1 = new Geometry("Box", b);
 		cube2 = cube1.clone();
 		cube3 = cube1.clone();
+		
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		Material mat2 = mat.clone(), mat3 = mat.clone();
 		mat.setColor("Color", ColorRGBA.Blue);
@@ -37,6 +47,7 @@ public class FieldView extends SimpleApplication {
 		cube2.setMaterial(mat2);
 		mat3.setColor("Color", ColorRGBA.Red);
 		cube3.setMaterial(mat3);
+		
 		
 		DirectionalLight directionalLight = new DirectionalLight(new Vector3f(-2, -10, 1));
 		directionalLight.setColor(ColorRGBA.White.mult(1.3f));
@@ -51,9 +62,20 @@ public class FieldView extends SimpleApplication {
 		cube2.setLocalTranslation(0, 3, 0);
 		cube3.setLocalTranslation(3, 0, -3);
 		
-		rootNode.attachChild(cube1);
-		rootNode.attachChild(cube2);
-		rootNode.attachChild(cube3);
+		//rootNode.attachChild(cube1);
+		//rootNode.attachChild(cube2);
+		//rootNode.attachChild(cube3);
+		
+		cube = new Geometry[15];
+		for (int i=0;i<15;i++)
+		{
+			cube[i] = new Geometry("Box", b);
+			cube[i].setMaterial(mat);
+			cube[i].setLocalTranslation(i*3,1,40);
+			rootNode.attachChild(cube[i]);
+		}
+		
+
 		
 		flyCam.setEnabled(false);
 		
@@ -75,9 +97,36 @@ public class FieldView extends SimpleApplication {
 		chaseCam.setDownRotateOnCloseViewOnly(false);
 		chaseCam.setSmoothMotion(true);
 		
-		test = new Game("../data/2013-11-03_tromso_stromsgodset_first.csv");
+		playbackRate = 50;
+		
+		test = new Game("data/2013-11-03_tromso_stromsgodset_first.csv");
 		i = 0;
 		timer = 0;
+		
+		theFrame.sliderProgress = theFrame.sliderProgress;
+		theFrame.sliderProgress.setMaximum(test.getSnapshotCount());
+		theFrame.sliderProgress.setMinimum(0);
+		theFrame.sliderProgress.setValue(0);
+
+	}
+	
+	public void setTime(int time)
+	{
+		if (time<0)
+			i=0;
+		if (time>test.getSnapshotCount())
+			i=test.getSnapshotCount();
+		i = time;
+	}
+	
+	public void giveFrame(MyFrame frame)
+	{
+		theFrame = frame;
+	}
+	
+	public void playPause()
+	{
+		playbackPaused ^= true; //XOR me dit-on
 	}
 	
 	@Override
@@ -87,16 +136,24 @@ public class FieldView extends SimpleApplication {
 		cube2.rotate(-2*tpf, 5*tpf, tpf);
 		cube3.rotate(2*tpf, -2*tpf, 7*tpf);
 		
-		// Test of positioning of a player using data from game
-		if(i < test.getSnapshotCount() && timer > 50)
+		if (!playbackPaused)
 		{
-			Snapshot s = test.getSnapshotByIndex(i);
-			Trace y = s.getTraceOfPlayer(8);
-			if(y != null)
-				cube1.setLocalTranslation(y.posX - 105/2, 0, y.posY - 68/2);
-			i++;
-			timer = 0;
+			// Test of positioning of a player using data from game
+			if(i < test.getSnapshotCount() && timer >= playbackRate)
+			{
+				Snapshot s = test.getSnapshotByIndex(i);
+				for (int p=0; p<15;p++)
+				{
+					Trace y = s.getTraceOfPlayer(p);
+					if(y != null)
+						cube[p].setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
+				}
+				i++;
+				timer -= playbackRate;
+				
+				theFrame.sliderProgress.setValue(i);
+			}
+			timer += 1000*tpf;
 		}
-		timer += 1000*tpf;
 	}
 }
