@@ -2,15 +2,18 @@ package footstats.view;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.ZipLocator;
+import com.jme3.font.*;
 import com.jme3.input.ChaseCamera;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.*;
 import com.jme3.system.AppSettings;
 
 import footstats.model.*;
@@ -23,8 +26,9 @@ public class FieldView extends SimpleApplication
 
 	private Geometry cube1, cube2, cube3;
 	private Geometry[] cube;
+	private BitmapText[] num;
+	private Material mat, mat2, mat3;
 	
-	;
 	private Game test;
 	private int i;
 	private float timer;
@@ -34,18 +38,22 @@ public class FieldView extends SimpleApplication
 	@Override
 	public void simpleInitApp()
 	{		
+		
+		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat2 = mat.clone(); mat3 = mat.clone();
+		
+		
 		Box b = new Box(1, 1, 1);
 		cube1 = new Geometry("Box", b);
 		cube2 = cube1.clone();
 		cube3 = cube1.clone();
 		
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		Material mat2 = mat.clone(), mat3 = mat.clone();
 		mat.setColor("Color", ColorRGBA.Blue);
 		cube1.setMaterial(mat);
 		mat2.setColor("Color", ColorRGBA.Green);
 		cube2.setMaterial(mat2);
-		mat3.setColor("Color", ColorRGBA.Red);
+		//mat3.setColor("Color", ColorRGBA.Red);
+		mat3.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,1.f));
 		cube3.setMaterial(mat3);
 		
 		
@@ -66,13 +74,36 @@ public class FieldView extends SimpleApplication
 		//rootNode.attachChild(cube2);
 		//rootNode.attachChild(cube3);
 		
+		Dome d = new Dome(30, 100, 200);
+		Geometry skybox = new Geometry("Dome", d);
+		Material matSky = mat.clone();
+		matSky.setColor("Color",new ColorRGBA(0.7f,0.7f,1.0f,1.0f));
+		skybox.setMaterial(matSky);
+		rootNode.attachChild(skybox);
+		viewPort.setBackgroundColor(new ColorRGBA(0.4f,0.5f,0.4f,1f));
+		
+		BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
+		
 		cube = new Geometry[15];
-		for (int i=0;i<15;i++)
+		num = new BitmapText[15];
+		for (int ko=0;ko<15;ko++)
 		{
-			cube[i] = new Geometry("Box", b);
-			cube[i].setMaterial(mat);
-			cube[i].setLocalTranslation(i*3,1,40);
-			rootNode.attachChild(cube[i]);
+			Node playerNode = new Node("player"+ko);
+			num[ko]=new BitmapText(fnt, false);
+			num[ko].setBox(new Rectangle(0, 0, 6, 3));
+			num[ko].setLocalTranslation(ko*3,4,40);
+			num[ko].setQueueBucket(Bucket.Transparent);
+			num[ko].setSize(2.0f);
+			num[ko].setText(""+(ko+1));
+			
+			playerNode.attachChild(num[ko]);
+			
+			
+			cube[ko] = new Geometry("Box", b);
+			cube[ko].setMaterial(mat);
+			cube[ko].setLocalTranslation(ko*3,1,40);
+			playerNode.attachChild(cube[ko]);
+			rootNode.attachChild(playerNode);
 		}
 		
 
@@ -99,7 +130,7 @@ public class FieldView extends SimpleApplication
 		
 		playbackRate = 50;
 		
-		test = new Game("data/2013-11-03_tromso_stromsgodset_first.csv");
+		test = new Game("data/2013-11-03_tromso_stromsgodset_second.csv");
 		i = 0;
 		timer = 0;
 		
@@ -144,9 +175,25 @@ public class FieldView extends SimpleApplication
 				Snapshot s = test.getSnapshotByIndex(i);
 				for (int p=0; p<15;p++)
 				{
-					Trace y = s.getTraceOfPlayer(p);
+					Trace y = s.getTraceOfPlayer(p+1);
 					if(y != null)
+					{
+						// transform shapes
 						cube[p].setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
+						num[p].setLocalTranslation(y.posX - 105/2, 4, y.posY - 68/2);
+						
+						
+						// Color active players blue
+						cube[p].setMaterial(mat);
+					}
+					else
+						// Color inactive players red
+						cube[p].setMaterial(mat3);
+					
+					// Make quaternion that looks at the cam to rotate the text to face the screen
+					Quaternion q = new Quaternion();
+					q.lookAt(cam.getLocation(),cam.getUp());
+					num[p].setLocalRotation(q);
 				}
 				i++;
 				timer -= playbackRate;

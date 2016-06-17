@@ -66,7 +66,7 @@ public class MyFrame extends JFrame
 		{	
 			public void actionPerformed(ActionEvent e)
 			{
-				if (threeDview.playbackRate>1)
+				if (threeDview.playbackRate>3)
 				{
 					threeDview.playbackRate*=0.5;
 				}
@@ -122,7 +122,7 @@ public class MyFrame extends JFrame
 		controlPanel.add(trianglePane);
 		controlPanel.add(sliderPane);
 		threeDpanel.setPreferredSize(new Dimension(500,500));
-		trianglePane.add(new JLabel(){{this.setPreferredSize(new Dimension(120,75));}});
+		trianglePane.add(new JLabel(){{this.setPreferredSize(new Dimension(120,75));}}); //padding (yes, Box.createRigidArea)
 		trianglePane.add(Box.createHorizontalGlue());
 		trianglePane.add(buttonSlowDown);
 		trianglePane.add(buttonPlay);
