@@ -3,7 +3,11 @@ import footstats.model.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -42,7 +46,7 @@ public class MyFrame extends JFrame
 		controlPanel = new JPanel();
 		controlPanel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
 		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-		buttonPlay = new JButton("II");
+		buttonPlay = new JButton(">");
 		buttonPlay.setFont(new Font("Arial", Font.PLAIN, 40));
 		buttonPlay.setPreferredSize(new Dimension(70,50));
 		buttonPlay.addActionListener(new ActionListener()
@@ -107,6 +111,41 @@ public class MyFrame extends JFrame
 		labelSpeed.setPreferredSize(new Dimension(120,75));
 		
 		buttonLoad = new JButton("LOAD");
+		buttonLoad.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				// Open file chooser to current directory
+				JFileChooser fc = new JFileChooser(".");
+				int returnVal = fc.showOpenDialog(MyFrame.this);
+
+		        if (returnVal == JFileChooser.APPROVE_OPTION)
+		        {
+		        	File gameFile = fc.getSelectedFile();
+		        	try
+		        	{
+		            	threeDview.setGame(new Game(gameFile.getPath()));
+			        } catch (FileNotFoundException e) {
+						System.err.println("Couldn't find file " + gameFile.getName());
+						JOptionPane.showMessageDialog(MyFrame.this,
+							    "Couldn't find file " + gameFile.getName(),
+							    "Error",
+							    JOptionPane.ERROR_MESSAGE);
+					} catch (IOException e) {
+						System.err.println(e.getMessage());
+						JOptionPane.showMessageDialog(MyFrame.this,
+							    e.getMessage(),
+							    "Error",
+							    JOptionPane.ERROR_MESSAGE);
+					} catch (ParseException e) {
+						System.err.println(e.getMessage());
+						JOptionPane.showMessageDialog(MyFrame.this,
+							    "Unsupported file format for file " + gameFile.getName(),
+							    "Error",
+							    JOptionPane.ERROR_MESSAGE);
+					}
+		            buttonPlay.setText("II");
+		        }
+			}
+		});
 		sliderProgress = new JSlider(0,2);
 		sliderProgress.addChangeListener(new ChangeListener()
 		{

@@ -29,7 +29,7 @@ public class FieldView extends SimpleApplication
 	private BitmapText[] num;
 	private Material mat, mat2, mat3;
 	
-	private Game test;
+	private Game game;
 	private int i;
 	private float timer;
 	int playbackRate;
@@ -129,24 +129,36 @@ public class FieldView extends SimpleApplication
 		chaseCam.setSmoothMotion(true);
 		
 		playbackRate = 50;
+		playbackPaused = true;
 		
-		test = new Game("data/2013-11-03_tromso_stromsgodset_second.csv");
+		game = null;
 		i = 0;
 		timer = 0;
 		
 		theFrame.sliderProgress = theFrame.sliderProgress;
-		theFrame.sliderProgress.setMaximum(test.getSnapshotCount());
+
+	}
+	
+	// Set a new game to read data from, reinitializing everything
+	public void setGame(Game g)
+	{
+		this.game = g;
+		i = 0;
+		timer = 0;
+		playbackPaused = true;
+		playbackRate = 50;
+		
+		theFrame.sliderProgress.setMaximum(game.getSnapshotCount());
 		theFrame.sliderProgress.setMinimum(0);
 		theFrame.sliderProgress.setValue(0);
-
 	}
 	
 	public void setTime(int time)
 	{
 		if (time<0)
 			i=0;
-		if (time>test.getSnapshotCount())
-			i=test.getSnapshotCount();
+		if (time>game.getSnapshotCount())
+			i=game.getSnapshotCount();
 		i = time;
 	}
 	
@@ -162,17 +174,21 @@ public class FieldView extends SimpleApplication
 	
 	@Override
 	public void simpleUpdate(float tpf)
-	{
-		cube1.rotate(2*tpf, 2*tpf, tpf);
-		cube2.rotate(-2*tpf, 5*tpf, tpf);
-		cube3.rotate(2*tpf, -2*tpf, 7*tpf);
+	{	
+		for(BitmapText label : num)
+		{
+			// Make quaternion that looks at the cam to rotate the text to face the screen
+			Quaternion q = new Quaternion();
+			q.lookAt(cam.getLocation(), cam.getUp());
+			label.setLocalRotation(q);
+		}
 		
-		if (!playbackPaused)
+		if (game != null)
 		{
 			// Test of positioning of a player using data from game
-			if(i < test.getSnapshotCount() && timer >= playbackRate)
+			if(i < game.getSnapshotCount() && timer >= playbackRate)
 			{
-				Snapshot s = test.getSnapshotByIndex(i);
+				Snapshot s = game.getSnapshotByIndex(i);
 				for (int p=0; p<15;p++)
 				{
 					Trace y = s.getTraceOfPlayer(p+1);
@@ -182,20 +198,14 @@ public class FieldView extends SimpleApplication
 						cube[p].setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
 						num[p].setLocalTranslation(y.posX - 105/2, 4, y.posY - 68/2);
 						
-						
 						// Color active players blue
 						cube[p].setMaterial(mat);
 					}
 					else
 						// Color inactive players red
 						cube[p].setMaterial(mat3);
-					
-					// Make quaternion that looks at the cam to rotate the text to face the screen
-					Quaternion q = new Quaternion();
-					q.lookAt(cam.getLocation(),cam.getUp());
-					num[p].setLocalRotation(q);
 				}
-				i++;
+				if(!playbackPaused) i++;
 				timer -= playbackRate;
 				
 				theFrame.sliderProgress.setValue(i);
