@@ -18,8 +18,12 @@ import com.jme3.system.JmeCanvasContext;
 
 public class MyFrame extends JFrame
 {
-	JPanel threeDpanel, controlPanel, trianglePane, sliderPane, sliderButtonsPane;
+	JPanel threeDpanel, controlPanel, settingsPane, trianglePane, sliderPane, sliderButtonsPane;
 	JButton buttonPlay, buttonFastForward, buttonSlowDown, buttonLoad, buttonHelp;
+	/**
+	 * whether paths are drawn or not
+	 */
+	JCheckBox checkBoxPath;
 	JSlider sliderProgress;
 	JLabel labelSpeed;
 	
@@ -46,6 +50,23 @@ public class MyFrame extends JFrame
 		controlPanel = new JPanel();
 		controlPanel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
 		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+		
+		settingsPane = new JPanel();
+		//settingsPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+		settingsPane.setBorder(null);
+		settingsPane.setPreferredSize(new Dimension(0,75)); //on dirait pas mais ça marche en fait TODO: gros bricolage
+		
+		checkBoxPath = new JCheckBox("Paths");
+		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
+			public void itemStateChanged(ItemEvent e)
+			{
+				threeDview.togglePaths();
+			}
+			
+		});
+		settingsPane.add(checkBoxPath);
+		
+		
 		buttonPlay = new JButton(">");
 		buttonPlay.setFont(new Font("Arial", Font.PLAIN, 40));
 		buttonPlay.setPreferredSize(new Dimension(70,50));
@@ -120,7 +141,8 @@ public class MyFrame extends JFrame
 		controlPanel.add(trianglePane);
 		controlPanel.add(sliderPane);
 		threeDpanel.setPreferredSize(new Dimension(500,500));
-		trianglePane.add(new JLabel(){{this.setPreferredSize(new Dimension(120,75));}}); //padding (yes, Box.createRigidArea)
+		//trianglePane.add(new JLabel(){{this.setPreferredSize(new Dimension(120,75));}}); //padding (yes, Box.createRigidArea)
+		trianglePane.add(settingsPane);
 		trianglePane.add(Box.createHorizontalGlue());
 		trianglePane.add(buttonSlowDown);
 		trianglePane.add(buttonPlay);

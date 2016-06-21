@@ -17,6 +17,7 @@ import com.jme3.scene.shape.*;
 import com.jme3.system.AppSettings;
 
 import footstats.model.*;
+import sun.java2d.loops.DrawPath;
 
 import javax.swing.JSlider;
 
@@ -24,23 +25,24 @@ public class FieldView extends SimpleApplication
 {
 	private MyFrame theFrame;
 
-	private Geometry cube1, cube2, cube3;
+	private Geometry cube1, cube2, cube3, smallCube;
 	private Geometry[] cube;
 	private BitmapText[] num;
-	private Material mat, mat2, mat3;
+	private Material mat, mat2, mat3, mat4;
+	private Node pathNode;
 	
 	private Game game;
 	private int i;
 	private float timer;
 	int playbackRate;
-	boolean playbackPaused;
+	boolean playbackPaused, pathsDrawn;
 	
 	@Override
 	public void simpleInitApp()
 	{		
 		
 		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat2 = mat.clone(); mat3 = mat.clone();
+		mat2 = mat.clone(); mat3 = mat.clone(); mat4 = mat.clone();
 		
 		
 		Box b = new Box(1, 1, 1);
@@ -48,14 +50,19 @@ public class FieldView extends SimpleApplication
 		cube2 = cube1.clone();
 		cube3 = cube1.clone();
 		
+		Box smallBox = new Box(0.2f,0.2f,0.2f); //it's not my fault if I only know how to make cubes
+		smallCube = new Geometry("Box", smallBox);
+		
 		mat.setColor("Color", ColorRGBA.Blue);
 		cube1.setMaterial(mat);
 		mat2.setColor("Color", ColorRGBA.Green);
 		cube2.setMaterial(mat2);
 		//mat3.setColor("Color", ColorRGBA.Red);
 		mat3.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,1.f));
+		mat4.setColor("Color", ColorRGBA.Yellow);
 		cube3.setMaterial(mat3);
 		
+		smallCube.setMaterial(mat4);
 		
 		DirectionalLight directionalLight = new DirectionalLight(new Vector3f(-2, -10, 1));
 		directionalLight.setColor(ColorRGBA.White.mult(1.3f));
@@ -106,6 +113,9 @@ public class FieldView extends SimpleApplication
 			rootNode.attachChild(playerNode);
 		}
 		
+		Node pathNode = new Node("paths");
+		rootNode.attachChild(pathNode);
+		//pathNode.attachChild(smallCube);
 
 		
 		flyCam.setEnabled(false);
@@ -130,6 +140,7 @@ public class FieldView extends SimpleApplication
 		
 		playbackRate = 50;
 		playbackPaused = true;
+		pathsDrawn = false;
 		
 		game = null;
 		i = 0;
@@ -172,6 +183,16 @@ public class FieldView extends SimpleApplication
 		playbackPaused ^= true; //XOR me dit-on
 	}
 	
+	public void togglePaths()
+	{
+		pathsDrawn ^= true;
+		if (!pathsDrawn)
+		{
+			pathNode.removeFromParent();
+			pathNode = new Node("paths");
+		}
+	}
+	
 	@Override
 	public void simpleUpdate(float tpf)
 	{	
@@ -194,6 +215,22 @@ public class FieldView extends SimpleApplication
 					Trace y = s.getTraceOfPlayer(p+1);
 					if(y != null)
 					{
+						if (pathsDrawn)
+						{
+							Geometry lol = smallCube.clone();
+							try //FIXME this doesn't actually work, just prevent the thing from crashing
+							{
+								pathNode.attachChild(lol);
+							}
+							catch (NullPointerException e)
+							{
+								System.err.println("God dammit");
+								pathNode = new Node("paths");
+								rootNode.attachChild(pathNode);
+								pathNode.attachChild(lol);
+							}
+							lol.setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
+						}
 						// transform shapes
 						cube[p].setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
 						num[p].setLocalTranslation(y.posX - 105/2, 4, y.posY - 68/2);
