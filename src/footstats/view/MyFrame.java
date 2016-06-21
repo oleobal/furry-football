@@ -18,8 +18,8 @@ import com.jme3.system.JmeCanvasContext;
 
 public class MyFrame extends JFrame
 {
-	JPanel threeDpanel, controlPanel, trianglePane, sliderPane;
-	JButton buttonPlay, buttonFastForward, buttonSlowDown, buttonLoad;
+	JPanel threeDpanel, controlPanel, trianglePane, sliderPane, sliderButtonsPane;
+	JButton buttonPlay, buttonFastForward, buttonSlowDown, buttonLoad, buttonHelp;
 	JSlider sliderProgress;
 	JLabel labelSpeed;
 	
@@ -49,66 +49,25 @@ public class MyFrame extends JFrame
 		buttonPlay = new JButton(">");
 		buttonPlay.setFont(new Font("Arial", Font.PLAIN, 40));
 		buttonPlay.setPreferredSize(new Dimension(70,50));
-		buttonPlay.addActionListener(new ActionListener()
-		{
-				public void actionPerformed(ActionEvent e)
-				{
-					threeDview.playPause();
-					if(buttonPlay.getText().equals("II"))
-					{
-						buttonPlay.setText(">");
-					}
-					else
-					{
-						buttonPlay.setText("II");
-					}
-				}
-		});
+		
 		buttonFastForward = new JButton("faster");
 		buttonFastForward.setFont(new Font("Arial", Font.PLAIN, 20));
-		buttonFastForward.addActionListener(new ActionListener()
-		{	
-			public void actionPerformed(ActionEvent e)
-			{
-				if (threeDview.playbackRate>3)
-				{
-					threeDview.playbackRate*=0.5;
-				}
-				if ((int)(50.0/(float)threeDview.playbackRate) == 0)
-					labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
-				else
-					labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
-				//System.err.println(threeDview.playbackRate);
-			}
-		});
+		
 		buttonSlowDown = new JButton("slower");
 		buttonSlowDown.setFont(buttonFastForward.getFont());
-		buttonSlowDown.addActionListener(new ActionListener()
-		{	
-			public void actionPerformed(ActionEvent e)
-			{
-				if (threeDview.playbackRate>1 && threeDview.playbackRate<800)
-				{
-					
-					if (threeDview.playbackRate==12) //ahem
-						threeDview.playbackRate=25;
-					else
-						threeDview.playbackRate*=2;
-				}
-				else if (threeDview.playbackRate == 1)
-				{
-					threeDview.playbackRate=3;
-				}
-				if ((int)(50.0/(float)threeDview.playbackRate) == 0)
-					labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
-				else
-					labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
-				//System.err.println(threeDview.playbackRate);
-			}
-		});
+		
 		labelSpeed = new JLabel("1x");
 		labelSpeed.setFont(buttonPlay.getFont());
 		labelSpeed.setPreferredSize(new Dimension(120,75));
+		
+		buttonHelp = new JButton("HELP");
+		buttonHelp.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
+			{
+				JOptionPane.showMessageDialog(MyFrame.this, "Use the LOAD button to select a file. They're in the data/ folder.\n\nOnce a file is being played:\nBlue icons are players, red icons means a player who's been lost.\n\nYou can use the Play Faster/Slower buttons and the progress bar at the bottom to play out the match as you like.\n\nYou can hold down the left mouse button to drag the camera around the field.", "Help", JOptionPane.INFORMATION_MESSAGE);
+				
+			}
+		});
 		
 		buttonLoad = new JButton("LOAD");
 		buttonLoad.addActionListener(new ActionListener(){
@@ -142,20 +101,20 @@ public class MyFrame extends JFrame
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
 					}
-		            buttonPlay.setText("II");
+		            buttonPlay.setText(">");
+		            enableButtons();
 		        }
 			}
 		});
-		sliderProgress = new JSlider(0,2);
-		sliderProgress.addChangeListener(new ChangeListener()
-		{
-			public void stateChanged(ChangeEvent e)
-			{
-				threeDview.setTime(sliderProgress.getValue());			
-			} 
-		});
 		
-		sliderPane.add(buttonLoad, BorderLayout.WEST);
+		
+		sliderProgress = new JSlider(0,2);
+		
+		
+		sliderButtonsPane = new JPanel();
+		sliderButtonsPane.add(buttonHelp);
+		sliderButtonsPane.add(buttonLoad);
+		sliderPane.add(sliderButtonsPane, BorderLayout.WEST);
 		sliderPane.add(sliderProgress, BorderLayout.CENTER);
 		
 		controlPanel.add(trianglePane);
@@ -199,5 +158,97 @@ public class MyFrame extends JFrame
 		this.setVisible(true);
 	}
 
+	
+	/**
+	 * enables the buttons and all so that you can't click before you've loaded something
+	 */
+	private void enableButtons()
+	{
+		
+		buttonPlay.addActionListener(new ActionListener()
+		{
+				public void actionPerformed(ActionEvent e)
+				{
+					threeDview.playPause();
+					if(buttonPlay.getText().equals("II"))
+					{
+						buttonPlay.setText(">");
+					}
+					else
+					{
+						buttonPlay.setText("II");
+					}
+				}
+		});
+		
+		
+		
+		
+		
+		buttonFastForward.addActionListener(new ActionListener()
+		{	
+			public void actionPerformed(ActionEvent e)
+			{
+				if (threeDview.playbackRate>3)
+				{
+					threeDview.playbackRate*=0.5;
+				}
+				if ((int)(50.0/(float)threeDview.playbackRate) == 0)
+					labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
+				else
+					labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
+				//System.err.println(threeDview.playbackRate);
+			}
+		});
+		
+		
+		
+		
+		
+		buttonSlowDown.addActionListener(new ActionListener()
+		{	
+			public void actionPerformed(ActionEvent e)
+			{
+				if (threeDview.playbackRate>1 && threeDview.playbackRate<800)
+				{
+					
+					if (threeDview.playbackRate==12) //ahem
+						threeDview.playbackRate=25;
+					else
+						threeDview.playbackRate*=2;
+				}
+				else if (threeDview.playbackRate == 1)
+				{
+					threeDview.playbackRate=3;
+				}
+				if ((int)(50.0/(float)threeDview.playbackRate) == 0)
+					labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
+				else
+					labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
+				//System.err.println(threeDview.playbackRate);
+			}
+		});
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		sliderProgress.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				threeDview.setTime(sliderProgress.getValue());			
+			} 
+		});
+		
+		
+		
+	}
 
 }
