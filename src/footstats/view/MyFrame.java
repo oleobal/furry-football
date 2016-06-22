@@ -24,7 +24,7 @@ public class MyFrame extends JFrame
 	/**
 	 * whether paths are drawn or not
 	 */
-	JCheckBox checkBoxPath, checkBoxHeat;
+	JCheckBox checkBoxPath, checkBoxHeat, checkBoxVisible;
 	JSlider sliderProgress;
 	JLabel labelSpeed, labelPlayer;
 	
@@ -63,7 +63,7 @@ public class MyFrame extends JFrame
 		settingsPane.setLayout(new BoxLayout(settingsPane, BoxLayout.Y_AXIS));
 		
 		// Checkbox for toggling path drawing
-		checkBoxPath = new JCheckBox("Paths");
+		checkBoxPath = new JCheckBox("Show paths");
 		checkBoxPath.setEnabled(false);
 		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
 			public void itemStateChanged(ItemEvent e)
@@ -97,6 +97,24 @@ public class MyFrame extends JFrame
 			
 		});
 		
+		//on pourrait le faire en CardLayout mais bon..
+		checkBoxVisible = new JCheckBox("Player visible");
+		checkBoxVisible.setEnabled(false);
+		checkBoxVisible.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e)
+			{
+				if (!labelPlayer.getText().equals("#"))
+				{
+					if (checkBoxVisible.isSelected())
+						threeDview.setPlayerVisible(Integer.parseInt(labelPlayer.getText()));
+					else
+						threeDview.setPlayerInvisible(Integer.parseInt(labelPlayer.getText()));
+				}
+			}
+			
+		});
+		
+		
 		// Camera focus settings
 		buttonPreviousPlayer = new JButton("<");
 		buttonPreviousPlayer.setEnabled(false);
@@ -112,14 +130,15 @@ public class MyFrame extends JFrame
 	
 		
 		settingsFollowPane = new JPanel();
-		settingsFollowPane.add(new JLabel("Camera:"));
+		settingsFollowPane.add(new JLabel("Focus:"));
 		settingsFollowPane.add(buttonPreviousPlayer);
 		settingsFollowPane.add(labelPlayer);
 		settingsFollowPane.add(buttonNextPlayer);
 		
 		settingsPane.add(checkBoxPath);
-		settingsPane.add(checkBoxHeat);
 		settingsPane.add(settingsFollowPane);
+		settingsPane.add(checkBoxVisible);
+		settingsPane.add(checkBoxHeat);
 		
 		// Main controls (play, faster, slower)
 		buttonPlay = new JButton(">");
@@ -372,12 +391,15 @@ public class MyFrame extends JFrame
 						{
 							labelPlayer.setText("#");
 							checkBoxHeat.setEnabled(false);
+							threeDview.showHeatmap(0);
+							checkBoxVisible.setEnabled(false);
 							threeDview.followPlayer(0);
 						}
 						else
 						{
 							labelPlayer.setText(""+(lol-1));
 							threeDview.followPlayer(lol-1);
+							checkBoxVisible.setSelected(threeDview.isPlayerVisible(lol-1));
 						}
 					}
 					
@@ -394,11 +416,14 @@ public class MyFrame extends JFrame
 					if (!labelPlayer.getText().equals("#"))
 					{
 						lol = Integer.parseInt(labelPlayer.getText());
+						checkBoxVisible.setSelected(threeDview.isPlayerVisible(lol+1));
 					}
 					else
 					{
 						lol = 0;
 						checkBoxHeat.setEnabled(true);
+						checkBoxVisible.setEnabled(true);
+						checkBoxVisible.setSelected(threeDview.isPlayerVisible(lol+1));
 					}
 					
 					if (lol != 15)

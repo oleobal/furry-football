@@ -47,6 +47,7 @@ public class FieldView extends SimpleApplication
 	private float timer;
 	int playbackRate;
 	boolean playbackPaused, pathsDrawn, removeDrawnPaths;
+	boolean[] playerVisible={true,true,true,true,true,true,true,true,true,true,true,true,true,true,true};
 	int playerHeatmap;
 	
 	@Override
@@ -115,7 +116,7 @@ public class FieldView extends SimpleApplication
 			num[ko]=new BitmapText(fnt, false);
 			num[ko].setBox(new Rectangle(0, 0, 6, 3));
 			num[ko].setLocalTranslation(ko*3,5,40);
-			num[ko].setQueueBucket(Bucket.Transparent);
+			num[ko].setQueueBucket(Bucket.Translucent);
 			num[ko].setSize(2.0f);
 			num[ko].setText(""+(ko+1));
 			
@@ -292,6 +293,65 @@ public class FieldView extends SimpleApplication
 		playerHeatmap = playerID;
 	}
 	
+	/**
+	 * 
+	 * @param playerID from 1 to 15, 0 to set all to visible
+	 */
+	public void setPlayerVisible(int playerID)
+	{
+		if (playerID<0)
+			playerID=0;
+		if (playerID>15)
+			playerID=15;
+		
+		if (playerID == 0)
+		{
+			for (int i=0;i<15;i++)
+				playerVisible[i]=true;
+		}
+		else
+		{
+			playerVisible[playerID-1] = true;
+		}
+		
+	}
+	/**
+	 * 
+	 * @param playerID from 1 to 15, 0 to set all to invisible
+	 */
+	public void setPlayerInvisible(int playerID)
+	{
+		if (playerID<0)
+			playerID=0;
+		if (playerID>15)
+			playerID=15;
+		
+		if (playerID == 0)
+		{
+			for (int i=0;i<15;i++)
+				playerVisible[i]=false;
+		}
+		else
+		{
+			playerVisible[playerID-1] = false;
+		}
+		
+	}
+
+	/**
+	 * 
+	 * @param playerID from 1 to 15
+	 * @return whether that player is visible
+	 */
+	public boolean isPlayerVisible(int playerID)
+	{
+		if (playerID<1)
+			playerID=1;
+		if (playerID>15)
+			playerID=15;
+		return playerVisible[playerID-1];
+	}
+	
 	@Override
 	public void simpleUpdate(float tpf)
 	{	
@@ -324,42 +384,45 @@ public class FieldView extends SimpleApplication
 				Snapshot s = game.getSnapshotByIndex(i);
 				for (int p=0; p<15;p++)
 				{
-					Trace y = s.getTraceOfPlayer(p+1);
-					if(y != null)
+					if (playerVisible[p])
 					{
-						if (pathsDrawn)
+						Trace y = s.getTraceOfPlayer(p+1);
+						if(y != null)
 						{
-							Geometry lol = smallCube.clone();
-							try
+							if (pathsDrawn)
 							{
-								pathNode.attachChild(lol);
+								Geometry lol = smallCube.clone();
+								try
+								{
+									pathNode.attachChild(lol);
+								}
+								catch (NullPointerException e)
+								{
+									//System.err.println("God dammit");
+									// now it's intentional ! No more errors !
+									pathNode = new Node("paths");
+									rootNode.attachChild(pathNode);
+									pathNode.attachChild(lol);
+								}
+								lol.setLocalTranslation(y.posX - 105/2, 0.1f, y.posY - 68/2);
 							}
-							catch (NullPointerException e)
-							{
-								//System.err.println("God dammit");
-								// now it's intentional ! No more errors !
-								pathNode = new Node("paths");
-								rootNode.attachChild(pathNode);
-								pathNode.attachChild(lol);
-							}
-							lol.setLocalTranslation(y.posX - 105/2, 0.1f, y.posY - 68/2);
+							// transform shapes
+							playerModel[p].setLocalTranslation(y.posX - 105/2, 0f, y.posY - 68/2);
+							playerModel[p].setLocalRotation(new Quaternion().fromAngles(0, y.heading, 0));
+							playerModel[p].setShadowMode(ShadowMode.Cast);
+							
+							num[p].setLocalTranslation(y.posX - 105/2, 5, y.posY - 68/2);
+							
+							// Color active players blue
+							playerModel[p].setMaterial(matActive);
+							playerModel[p].setQueueBucket(Bucket.Inherit);
 						}
-						// transform shapes
-						playerModel[p].setLocalTranslation(y.posX - 105/2, 0f, y.posY - 68/2);
-						playerModel[p].setLocalRotation(new Quaternion().fromAngles(0, y.heading, 0));
-						playerModel[p].setShadowMode(ShadowMode.Cast);
-						
-						num[p].setLocalTranslation(y.posX - 105/2, 5, y.posY - 68/2);
-						
-						// Color active players blue
-						playerModel[p].setMaterial(matActive);
-						playerModel[p].setQueueBucket(Bucket.Inherit);
-					}
-					else
-					{
-						// Color inactive players red and translucent
-						playerModel[p].setMaterial(matInactive);
-						playerModel[p].setQueueBucket(Bucket.Transparent);
+						else
+						{
+							// Color inactive players red and translucent
+							playerModel[p].setMaterial(matInactive);
+							playerModel[p].setQueueBucket(Bucket.Transparent);
+						}
 					}
 				}
 				if(!playbackPaused) i++;
