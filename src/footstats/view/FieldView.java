@@ -17,6 +17,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.*;
 import com.jme3.shadow.BasicShadowRenderer;
 import com.jme3.shadow.PssmShadowRenderer;
@@ -36,7 +37,7 @@ public class FieldView extends SimpleApplication
 	private Spatial[] cube;
 	private Spatial field_geom;
 	private BitmapText[] num;
-	private Material matActive, matInactive, matPath;
+	private Material matActive, matInactive, matPath, matHeatmap;
 	private Node pathNode, heatmapNode;
 	
 	private Game game;
@@ -52,6 +53,7 @@ public class FieldView extends SimpleApplication
 		matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		matInactive = matActive.clone();
 		matPath = matActive.clone();
+		matHeatmap = matActive.clone();
 		
 		Sphere smallBox = new Sphere(10, 10, 0.1f, true, true);//new Box(0.2f,0.2f,0.2f); //it's not my fault if I only know how to make cubes
 		smallCube = new Geometry("Sphere", smallBox);
@@ -59,6 +61,7 @@ public class FieldView extends SimpleApplication
 		matActive.setColor("Color", ColorRGBA.Blue);
 		matInactive.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,1.f));
 		matPath.setColor("Color", ColorRGBA.Yellow);
+		matHeatmap.setColor("Color", ColorRGBA.Green);
 		
 		smallCube.setMaterial(matPath);
 		
@@ -84,7 +87,19 @@ public class FieldView extends SimpleApplication
 		
 		BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
 		
-		
+		heatmapNode = new Node("heatmap");
+		heatmapNode.setCullHint(CullHint.Always);
+		for (int j=0;j<68;j++)
+		{
+			for (int i=0;i<105;i++)
+			{
+				Geometry thing = new Geometry("Parallelepipede Rectangle en anglais", new Box(1,1,1));
+				thing.setMaterial(matHeatmap);
+				thing.setLocalTranslation(i-52, 1, j-34);
+				heatmapNode.attachChild(thing);
+			}
+		}
+		rootNode.attachChild(heatmapNode);
 				
 		cube = new Spatial[15];
 		num = new BitmapText[15];
@@ -265,7 +280,7 @@ public class FieldView extends SimpleApplication
 		{
 			if (heatmapNode != null)
 			{
-				heatmapNode.removeFromParent();
+				heatmapNode.setCullHint(CullHint.Always);
 			}
 		}
 		else
@@ -275,17 +290,15 @@ public class FieldView extends SimpleApplication
 			//int terrainScale = 70;
 			
 			int[][] heatmap = m.getMap();
-			for (int j=0;j<68;j++)
+			for (int i=0;i<105*68;i++)
 			{
-				for (int i=0;i<105;i++)
-				{
-					Geometry thing = new Geometry("Parallelepipede Rectangle en anglais", new Box(1,heatmap[j][i],1));
-					thing.setLocalTranslation(i-52,0,j-34);
-					heatmapNode.attachChild(thing);
-					System.err.println("lol "+j+" "+i);
-				}
+				Spatial heat = heatmapNode.getChild(i);
+				heat.setLocalScale(1, 25*(heatmap[i%68][i/105]/(float)m.getMaxHeat()), 1);
+				heat.setLocalTranslation(0,heatmap[i%68][i/105]/2,0);
+				System.out.println(heatmap[i%68][i/105]);
+				matHeatmap.setColor("Color", new ColorRGBA(heatmap[i%68][i/105]/((float)m.getMaxHeat()),0,0,1));
 			}
-			rootNode.attachChild(heatmapNode);
+			heatmapNode.setCullHint(CullHint.Inherit);
 		}
 	}
 	

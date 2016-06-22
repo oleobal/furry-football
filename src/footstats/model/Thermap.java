@@ -2,6 +2,8 @@ package footstats.model;
 
 import java.util.ArrayList;
 
+import com.sun.xml.internal.ws.wsdl.parser.MexEntityResolver;
+
 /**
  *	         x  +------------------------------------------105->
  *
@@ -30,9 +32,11 @@ public class Thermap
 	 * whose thermical map it is 
 	 */
 	public final int playerId;
+	private int maxHeat;
 	
 	public Thermap(Integer player, ArrayList<Snapshot> s)
 	{
+		maxHeat = 0;
 		terrain = new int[105][68];
 		playerId = player;
 		Trace lol;
@@ -45,6 +49,10 @@ public class Thermap
 				{
 					//System.err.println(i.getTimestamp()+"  "+terrain[(int)lol.posX][(int)lol.posY]);
 					terrain[(int)lol.posX][(int)lol.posY]++;
+					if(terrain[(int)lol.posX][(int)lol.posY] > maxHeat)
+					{
+						maxHeat = terrain[(int)lol.posX][(int)lol.posY];
+					}
 				}
 			}
 		}
@@ -63,10 +71,16 @@ public class Thermap
 			while(i<105)
 			{
 				lol[i][j] = terrain[i][j];
+				i++;
 			}
 			i=0;j++;
 		}
 		return lol;
+	}
+	
+	public int getMaxHeat()
+	{
+		return maxHeat;
 	}
 	
 	
