@@ -24,7 +24,7 @@ public class MyFrame extends JFrame
 	/**
 	 * whether paths are drawn or not
 	 */
-	JCheckBox checkBoxPath;
+	JCheckBox checkBoxPath, checkBoxHeat;
 	JSlider sliderProgress;
 	JLabel labelSpeed, labelPlayer;
 	
@@ -63,12 +63,36 @@ public class MyFrame extends JFrame
 		settingsPane.setLayout(new BoxLayout(settingsPane, BoxLayout.Y_AXIS));
 		
 		// Checkbox for toggling path drawing
-		checkBoxPath = new JCheckBox("Show paths");
+		checkBoxPath = new JCheckBox("Paths");
 		checkBoxPath.setEnabled(false);
 		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
 			public void itemStateChanged(ItemEvent e)
 			{
 				threeDview.togglePaths();
+			}
+			
+		});
+		
+		checkBoxHeat = new JCheckBox("Player heatmap");
+		checkBoxHeat.setEnabled(false);
+		checkBoxHeat.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
+			public void itemStateChanged(ItemEvent e)
+			{
+				if (checkBoxHeat.isSelected())
+				{
+					if (labelPlayer.getText().equals("#"))
+					{
+						//threeDview.showHeatmap(0);
+					}
+					else
+					{
+						threeDview.showHeatmap(Integer.parseInt(labelPlayer.getText()));
+					}
+				}
+				else
+				{
+					threeDview.showHeatmap(0);
+				}
 			}
 			
 		});
@@ -94,6 +118,7 @@ public class MyFrame extends JFrame
 		settingsFollowPane.add(buttonNextPlayer);
 		
 		settingsPane.add(checkBoxPath);
+		settingsPane.add(checkBoxHeat);
 		settingsPane.add(settingsFollowPane);
 		
 		// Main controls (play, faster, slower)
@@ -346,6 +371,7 @@ public class MyFrame extends JFrame
 						if (lol == 1)
 						{
 							labelPlayer.setText("#");
+							checkBoxHeat.setEnabled(false);
 							threeDview.followPlayer(0);
 						}
 						else
@@ -370,7 +396,10 @@ public class MyFrame extends JFrame
 						lol = Integer.parseInt(labelPlayer.getText());
 					}
 					else
+					{
 						lol = 0;
+						checkBoxHeat.setEnabled(true);
+					}
 					
 					if (lol != 15)
 					{

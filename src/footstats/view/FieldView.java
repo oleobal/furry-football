@@ -37,7 +37,7 @@ public class FieldView extends SimpleApplication
 	private Spatial field_geom;
 	private BitmapText[] num;
 	private Material matActive, matInactive, matPath;
-	private Node pathNode;
+	private Node pathNode, heatmapNode;
 	
 	private Game game;
 	private int i;
@@ -248,6 +248,45 @@ public class FieldView extends SimpleApplication
 			
 		}
 		
+	}
+	
+	/**
+	 * 
+	 * @param playerID from 1 to 15, or 0 to remove it
+	 */
+	public void showHeatmap(int playerID)
+	{		
+		if (playerID<0)
+			playerID=0;
+		if (playerID>15)
+			playerID=15;
+		
+		if (playerID == 0)
+		{
+			if (heatmapNode != null)
+			{
+				heatmapNode.removeFromParent();
+			}
+		}
+		else
+		{
+			System.err.println("LOLOL");
+			Thermap m = new Thermap(playerID-1, this.game.getSnapshots());
+			//int terrainScale = 70;
+			
+			int[][] heatmap = m.getMap();
+			for (int j=0;j<68;j++)
+			{
+				for (int i=0;i<105;i++)
+				{
+					Geometry thing = new Geometry("Parallelepipede Rectangle en anglais", new Box(1,heatmap[j][i],1));
+					thing.setLocalTranslation(i-52,0,j-34);
+					heatmapNode.attachChild(thing);
+					System.err.println("lol "+j+" "+i);
+				}
+			}
+			rootNode.attachChild(heatmapNode);
+		}
 	}
 	
 	@Override
