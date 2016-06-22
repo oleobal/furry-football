@@ -19,14 +19,14 @@ import com.jme3.system.JmeCanvasContext;
 
 public class MyFrame extends JFrame
 {
-	JPanel threeDpanel, controlPanel, settingsPane, trianglePane, sliderPane, sliderButtonsPane;
-	JButton buttonPlay, buttonFastForward, buttonSlowDown, buttonLoad, buttonHelp;
+	JPanel threeDpanel, controlPanel, settingsPane, settingsFollowPane, trianglePane, sliderPane, sliderButtonsPane;
+	JButton buttonPlay, buttonFastForward, buttonSlowDown, buttonLoad, buttonHelp, buttonNextPlayer, buttonPreviousPlayer;
 	/**
 	 * whether paths are drawn or not
 	 */
 	JCheckBox checkBoxPath;
 	JSlider sliderProgress;
-	JLabel labelSpeed;
+	JLabel labelSpeed, labelPlayer;
 	
 	FieldView threeDview;
 	Canvas    canvas;
@@ -69,7 +69,33 @@ public class MyFrame extends JFrame
 			}
 			
 		});
+		
+		/*
+		//fuck spinners
+		SpinnerNumberModel playFolMod = new SpinnerNumberModel(0,0,15,1); //default, min, max, step
+		spinnerPlayerFollow = new JSpinner(playFolMod);
+		//(spinnerPlayerFollow.getTextField()).
+		 */
+		
+		buttonPreviousPlayer = new JButton("<");
+		buttonPreviousPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
+		buttonPreviousPlayer.setPreferredSize(new Dimension(20,20));
+		buttonPreviousPlayer.setMargin(new Insets(0,0,0,0));
+		buttonNextPlayer = new JButton(">");
+		buttonNextPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
+		buttonNextPlayer.setPreferredSize(new Dimension(20,20));
+		buttonNextPlayer.setMargin(new Insets(0,0,0,0));
+		labelPlayer = new JLabel("#");
+	
+		
+		settingsFollowPane = new JPanel();
+		settingsFollowPane.add(new JLabel("Camera:"));
+		settingsFollowPane.add(buttonPreviousPlayer);
+		settingsFollowPane.add(labelPlayer);
+		settingsFollowPane.add(buttonNextPlayer);
+		
 		settingsPane.add(checkBoxPath);
+		settingsPane.add(settingsFollowPane);
 		
 		
 		buttonPlay = new JButton(">");
@@ -287,6 +313,55 @@ public class MyFrame extends JFrame
 				{
 					threeDview.setTime(sliderProgress.getValue());	
 				} 
+			});
+			
+			
+			
+			buttonPreviousPlayer.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					if (!labelPlayer.getText().equals("#"))
+					{
+						int lol = Integer.parseInt(labelPlayer.getText());
+						if (lol == 1)
+						{
+							labelPlayer.setText("#");
+							threeDview.followPlayer(0);
+						}
+						else
+						{
+							labelPlayer.setText(""+(lol-1));
+							threeDview.followPlayer(lol-1);
+						}
+					}
+					
+				}
+				
+			});
+			
+			buttonNextPlayer.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					int lol;
+					if (!labelPlayer.getText().equals("#"))
+					{
+						lol = Integer.parseInt(labelPlayer.getText());
+					}
+					else
+						lol = 0;
+					
+					if (lol != 15)
+					{
+						labelPlayer.setText(""+(lol+1));
+						threeDview.followPlayer(lol+1);
+					}
+						
+					
+					
+				}
+				
 			});
 		}
 		

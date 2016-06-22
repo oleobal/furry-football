@@ -34,6 +34,7 @@ public class FieldView extends SimpleApplication
 	private ChaseCamera chaseCam;
 	private Geometry cube1, cube2, cube3, smallCube;
 	private Spatial[] cube;
+	private Spatial field_geom;
 	private BitmapText[] num;
 	private Material mat, mat2, mat3, mat4;
 	private Node pathNode;
@@ -77,7 +78,7 @@ public class FieldView extends SimpleApplication
 		rootNode.addLight(directionalLight);
 		
 		assetManager.registerLocator("stade.zip", ZipLocator.class);
-		Spatial field_geom = assetManager.loadModel("stade/soccer.obj");
+		field_geom = assetManager.loadModel("stade/soccer.obj");
 		field_geom.setShadowMode(ShadowMode.Receive);
 		Node field_node = new Node("field");
 		field_node.attachChild(field_geom);
@@ -242,6 +243,29 @@ public class FieldView extends SimpleApplication
 			//rootNode.attachChild(pathNode);
 		}
 		*/
+	}
+	
+	/**
+	 * @param playerID : from 1 to 15, or 0 to center
+	 */
+	public void followPlayer(int playerID)
+	{
+		if (playerID<0)
+			playerID=0;
+		if (playerID>15)
+			playerID=15;
+		
+		if (playerID == 0)
+		{
+			chaseCam.setSpatial(field_geom);
+		}
+		
+		else
+		{
+			chaseCam.setSpatial(cube[playerID-1]);
+			
+		}
+		
 	}
 	
 	@Override
