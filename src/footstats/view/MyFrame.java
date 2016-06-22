@@ -37,6 +37,7 @@ public class MyFrame extends JFrame
 	{
 		super(title);
 		this.setPreferredSize(new Dimension(800, 625));
+		this.setMinimumSize(new Dimension(550, 300));
 		this.setResizable(true);
 		this.setLocation(200,200);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,18 +51,20 @@ public class MyFrame extends JFrame
 		
 		contentPane.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		
+		// 3D view of the field
 		threeDpanel = new JPanel();
 		threeDpanel.setBackground(Color.BLACK);
+		
 		controlPanel = new JPanel();
 		controlPanel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
 		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
 		
 		settingsPane = new JPanel();
-		//settingsPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-		settingsPane.setBorder(null);
-		settingsPane.setPreferredSize(new Dimension(0,75)); //on dirait pas mais �a marche en fait TODO: gros bricolage
+		settingsPane.setLayout(new BoxLayout(settingsPane, BoxLayout.Y_AXIS));
 		
+		// Checkbox for toggling path drawing
 		checkBoxPath = new JCheckBox("Paths");
+		checkBoxPath.setEnabled(false);
 		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
 			public void itemStateChanged(ItemEvent e)
 			{
@@ -70,18 +73,14 @@ public class MyFrame extends JFrame
 			
 		});
 		
-		/*
-		//fuck spinners
-		SpinnerNumberModel playFolMod = new SpinnerNumberModel(0,0,15,1); //default, min, max, step
-		spinnerPlayerFollow = new JSpinner(playFolMod);
-		//(spinnerPlayerFollow.getTextField()).
-		 */
-		
+		// Camera focus settings
 		buttonPreviousPlayer = new JButton("<");
+		buttonPreviousPlayer.setEnabled(false);
 		buttonPreviousPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
 		buttonPreviousPlayer.setPreferredSize(new Dimension(20,20));
 		buttonPreviousPlayer.setMargin(new Insets(0,0,0,0));
 		buttonNextPlayer = new JButton(">");
+		buttonNextPlayer.setEnabled(false);
 		buttonNextPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
 		buttonNextPlayer.setPreferredSize(new Dimension(20,20));
 		buttonNextPlayer.setMargin(new Insets(0,0,0,0));
@@ -97,21 +96,28 @@ public class MyFrame extends JFrame
 		settingsPane.add(checkBoxPath);
 		settingsPane.add(settingsFollowPane);
 		
-		
+		// Main controls (play, faster, slower)
 		buttonPlay = new JButton(">");
+		buttonPlay.setEnabled(false);
 		buttonPlay.setFont(new Font("Arial", Font.PLAIN, 40));
 		buttonPlay.setPreferredSize(new Dimension(70,50));
 		
 		buttonFastForward = new JButton("faster");
+		buttonFastForward.setEnabled(false);
 		buttonFastForward.setFont(new Font("Arial", Font.PLAIN, 20));
 		
 		buttonSlowDown = new JButton("slower");
+		buttonSlowDown.setEnabled(false);
 		buttonSlowDown.setFont(buttonFastForward.getFont());
 		
+		// Label displaying current speed
+		JPanel speedPane = new JPanel(new FlowLayout(FlowLayout.TRAILING));
 		labelSpeed = new JLabel("1x");
 		labelSpeed.setFont(buttonPlay.getFont());
-		labelSpeed.setPreferredSize(new Dimension(120,75));
+		speedPane.add(labelSpeed);
+		speedPane.setPreferredSize(settingsPane.getPreferredSize());
 		
+		// Lower controls (load button, slider)
 		buttonHelp = new JButton("HELP");
 		buttonHelp.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
@@ -124,6 +130,11 @@ public class MyFrame extends JFrame
 		buttonLoad = new JButton("LOAD");
 		buttonLoad.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
+				
+				// Give user loading feedback
+				buttonPlay.setText("Loading...");
+				buttonPlay.setPreferredSize(null);
+				
 				// Open file chooser to current directory
 				JFileChooser fc = new JFileChooser("./data");
 				int returnVal = fc.showOpenDialog(MyFrame.this);
@@ -134,13 +145,7 @@ public class MyFrame extends JFrame
 		        	File gameFile = fc.getSelectedFile();
 		        	try
 		        	{
-		        		/*
-		        		Thread t = new Thread(new Runnable(){
-		                    public void run(){
-				        		JOptionPane.showMessageDialog(MyFrame.this, "Loading your file" , "Loading", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("loading.gif"));//new ImageIcon(ImageIO.read(new File("loading.gif")).getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
-		                    }
-		                });
-		            	t.start(); */
+		        		
 		            	threeDview.setGame(new Game(gameFile.getPath()));
 		            	
 		            	
@@ -153,6 +158,7 @@ public class MyFrame extends JFrame
 							    "Couldn't find file " + gameFile.getName(),
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
+						return;
 					}
 		        	catch (IOException e)
 		        	{
@@ -161,6 +167,7 @@ public class MyFrame extends JFrame
 							    e.getMessage(),
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
+						return;
 					}
 		        	catch (ParseException e)
 		        	{
@@ -169,15 +176,23 @@ public class MyFrame extends JFrame
 							    "Unsupported file format for file " + gameFile.getName(),
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
+						return;
 					}
-		            buttonPlay.setText(">");
+		            finally
+		            {
+		            	buttonPlay.setText(">");
+		            	buttonPlay.setPreferredSize(new Dimension(70,50));
+		            }
+		        	
+		        	// if loading is successful, enable all buttons
 		            enableButtons();
 		        }
 			}
 		});
 		
 		
-		sliderProgress = new JSlider(0,2);
+		sliderProgress = new JSlider(0,0);
+		sliderProgress.setEnabled(false);
 		
 		
 		sliderButtonsPane = new JPanel();
@@ -186,17 +201,21 @@ public class MyFrame extends JFrame
 		sliderPane.add(sliderButtonsPane, BorderLayout.WEST);
 		sliderPane.add(sliderProgress, BorderLayout.CENTER);
 		
-		controlPanel.add(trianglePane);
-		controlPanel.add(sliderPane);
-		threeDpanel.setPreferredSize(new Dimension(500,500));
-		//trianglePane.add(new JLabel(){{this.setPreferredSize(new Dimension(120,75));}}); //padding (yes, Box.createRigidArea)
-		trianglePane.add(settingsPane);
+		trianglePane.setPreferredSize(new Dimension(0,0));
 		trianglePane.add(Box.createHorizontalGlue());
 		trianglePane.add(buttonSlowDown);
 		trianglePane.add(buttonPlay);
 		trianglePane.add(buttonFastForward);
 		trianglePane.add(Box.createHorizontalGlue());
-		trianglePane.add(labelSpeed);
+		
+		JPanel upperControls = new JPanel(new BorderLayout());
+		upperControls.add(settingsPane, BorderLayout.WEST);
+		upperControls.add(trianglePane, BorderLayout.CENTER);
+		upperControls.add(speedPane, BorderLayout.EAST);
+		
+		controlPanel.add(upperControls);
+		controlPanel.add(sliderPane);
+		threeDpanel.setPreferredSize(new Dimension(500,500));
 		
 		contentPane.add(controlPanel, BorderLayout.SOUTH);
 		
@@ -238,7 +257,7 @@ public class MyFrame extends JFrame
 		{
 			buttonsEnabled = true;
 			
-			
+			buttonPlay.setEnabled(true);
 			buttonPlay.addActionListener(new ActionListener()
 			{
 					public void actionPerformed(ActionEvent e)
@@ -258,7 +277,7 @@ public class MyFrame extends JFrame
 			
 			
 			
-			
+			buttonFastForward.setEnabled(true);
 			buttonFastForward.addActionListener(new ActionListener()
 			{	
 				public void actionPerformed(ActionEvent e)
@@ -278,7 +297,7 @@ public class MyFrame extends JFrame
 			
 			
 			
-			
+			buttonSlowDown.setEnabled(true);
 			buttonSlowDown.addActionListener(new ActionListener()
 			{	
 				public void actionPerformed(ActionEvent e)
@@ -306,7 +325,7 @@ public class MyFrame extends JFrame
 			
 			
 			
-			
+			sliderProgress.setEnabled(true);
 			sliderProgress.addChangeListener(new ChangeListener()
 			{
 				public void stateChanged(ChangeEvent e)
@@ -316,7 +335,7 @@ public class MyFrame extends JFrame
 			});
 			
 			
-			
+			buttonPreviousPlayer.setEnabled(true);
 			buttonPreviousPlayer.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)
@@ -340,6 +359,7 @@ public class MyFrame extends JFrame
 				
 			});
 			
+			buttonNextPlayer.setEnabled(true);
 			buttonNextPlayer.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)
@@ -363,6 +383,8 @@ public class MyFrame extends JFrame
 				}
 				
 			});
+			
+			checkBoxPath.setEnabled(true);
 		}
 		
 		

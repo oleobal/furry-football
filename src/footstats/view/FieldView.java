@@ -32,11 +32,11 @@ public class FieldView extends SimpleApplication
 	private MyFrame theFrame;
 
 	private ChaseCamera chaseCam;
-	private Geometry cube1, cube2, cube3, smallCube;
+	private Geometry smallCube;
 	private Spatial[] cube;
 	private Spatial field_geom;
 	private BitmapText[] num;
-	private Material mat, mat2, mat3, mat4;
+	private Material matActive, matInactive, matPath;
 	private Node pathNode;
 	
 	private Game game;
@@ -49,29 +49,18 @@ public class FieldView extends SimpleApplication
 	public void simpleInitApp()
 	{		
 		
-		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat2 = mat.clone(); mat3 = mat.clone(); mat4 = mat.clone();
-		
-		
-		Box b = new Box(1, 1, 1);
-
-		cube1 = new Geometry("LOL", new Mesh());
-		cube2 = cube1.clone();
-		cube3 = cube1.clone();
+		matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		matInactive = matActive.clone();
+		matPath = matActive.clone();
 		
 		Sphere smallBox = new Sphere(10, 10, 0.1f, true, true);//new Box(0.2f,0.2f,0.2f); //it's not my fault if I only know how to make cubes
 		smallCube = new Geometry("Sphere", smallBox);
 		
-		mat.setColor("Color", ColorRGBA.Blue);
-		cube1.setMaterial(mat);
-		mat2.setColor("Color", ColorRGBA.Green);
-		cube2.setMaterial(mat2);
-		//mat3.setColor("Color", ColorRGBA.Red);
-		mat3.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,1.f));
-		mat4.setColor("Color", ColorRGBA.Yellow);
-		cube3.setMaterial(mat3);
+		matActive.setColor("Color", ColorRGBA.Blue);
+		matInactive.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,1.f));
+		matPath.setColor("Color", ColorRGBA.Yellow);
 		
-		smallCube.setMaterial(mat4);
+		smallCube.setMaterial(matPath);
 		
 		DirectionalLight directionalLight = new DirectionalLight(new Vector3f(-2, -10, 1));
 		directionalLight.setColor(ColorRGBA.White.mult(1.3f));
@@ -84,16 +73,9 @@ public class FieldView extends SimpleApplication
 		field_node.attachChild(field_geom);
 		rootNode.attachChild(field_node);
 		
-		cube2.setLocalTranslation(0, 3, 0);
-		cube3.setLocalTranslation(3, 0, -3);
-		
-		//rootNode.attachChild(cube1);
-		//rootNode.attachChild(cube2);
-		//rootNode.attachChild(cube3);
-		
 		Dome d = new Dome(30, 100, 200);
 		Geometry skybox = new Geometry("Dome", d);
-		Material matSky = mat.clone();
+		Material matSky = matActive.clone();
 		matSky.setColor("Color",new ColorRGBA(0.7f,0.7f,1.0f,1.0f));
 		skybox.setMaterial(matSky);
 		rootNode.attachChild(skybox);
@@ -124,7 +106,7 @@ public class FieldView extends SimpleApplication
 			cube[ko] = assetManager.loadModel("stade/trex.obj");
 			//cube[ko] = assetManager.loadModel("stade/T-800.obj");
 			cube[ko].setLocalScale(0.7f);
-			cube[ko].setMaterial(mat);
+			cube[ko].setMaterial(matActive);
 			cube[ko].setShadowMode(ShadowMode.Cast);
 			cube[ko].setLocalTranslation(ko*3,0f,40);
 			cube[ko].setLocalRotation(new Quaternion().fromAngles(0, (float)Math.PI, 0)); // make them start facing the field
@@ -328,11 +310,11 @@ public class FieldView extends SimpleApplication
 						num[p].setLocalTranslation(y.posX - 105/2, 5, y.posY - 68/2);
 						
 						// Color active players blue
-						cube[p].setMaterial(mat);
+						cube[p].setMaterial(matActive);
 					}
 					else
 						// Color inactive players red
-						cube[p].setMaterial(mat3);
+						cube[p].setMaterial(matInactive);
 				}
 				if(!playbackPaused) i++;
 				timer -= playbackRate;
