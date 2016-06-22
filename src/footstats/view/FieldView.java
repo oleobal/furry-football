@@ -110,7 +110,7 @@ public class FieldView extends SimpleApplication
 			Node playerNode = new Node("player"+ko);
 			num[ko]=new BitmapText(fnt, false);
 			num[ko].setBox(new Rectangle(0, 0, 6, 3));
-			num[ko].setLocalTranslation(ko*3,3,40);
+			num[ko].setLocalTranslation(ko*3,5,40);
 			num[ko].setQueueBucket(Bucket.Transparent);
 			num[ko].setSize(2.0f);
 			num[ko].setText(""+(ko+1));
@@ -122,10 +122,11 @@ public class FieldView extends SimpleApplication
 			//cube[ko] = assetManager.loadModel("stade/player.obj");
 			cube[ko] = assetManager.loadModel("stade/trex.obj");
 			//cube[ko] = assetManager.loadModel("stade/T-800.obj");
-			cube[ko].setLocalScale(0.5f);
+			cube[ko].setLocalScale(0.7f);
 			cube[ko].setMaterial(mat);
 			cube[ko].setShadowMode(ShadowMode.Cast);
 			cube[ko].setLocalTranslation(ko*3,0f,40);
+			cube[ko].setLocalRotation(new Quaternion().fromAngles(0, (float)Math.PI, 0)); // make them start facing the field
 			playerNode.attachChild(cube[ko]);
 			rootNode.attachChild(playerNode);
 		}
@@ -144,7 +145,7 @@ public class FieldView extends SimpleApplication
 		chaseCam.setRotationSpeed(10);
 		chaseCam.setMinVerticalRotation((float) Math.PI/12);
 		chaseCam.setMaxVerticalRotation((float) (Math.PI/2));
-		chaseCam.setMinDistance(30f);
+		chaseCam.setMinDistance(20f);
 		chaseCam.setMaxDistance(150);
 		
 		// Default camera position and orientation
@@ -154,8 +155,6 @@ public class FieldView extends SimpleApplication
 		
 		chaseCam.setDownRotateOnCloseViewOnly(false);
 		chaseCam.setSmoothMotion(true);
-		
-		chaseCam.setSpatial(cube[0]);
 		
 		chaseCam.setLookAtOffset(new Vector3f(0, 0, 0));
 		
@@ -251,10 +250,8 @@ public class FieldView extends SimpleApplication
 		
 		for(BitmapText label : num)
 		{
-			// Make quaternion that looks at the cam to rotate the text to face the screen
-			Quaternion q = new Quaternion();
-			q.lookAt(cam.getLocation(), cam.getUp());
-			label.setLocalRotation(q);
+			// no need for any fancy quaternions, lol
+			label.lookAt(cam.getLocation(), cam.getUp());
 		}
 		
 		if (removeDrawnPaths)
@@ -301,10 +298,10 @@ public class FieldView extends SimpleApplication
 						}
 						// transform shapes
 						cube[p].setLocalTranslation(y.posX - 105/2, 0f, y.posY - 68/2);
-						Quaternion heading = new Quaternion(new float[]{0, y.heading, 0});//(float) (y.heading + Math.PI/2), 0}); //FIXME: not sure
-						cube[p].setLocalRotation(heading);
+						cube[p].setLocalRotation(new Quaternion().fromAngles(0, y.heading, 0));
 						cube[p].setShadowMode(ShadowMode.Cast);
-						num[p].setLocalTranslation(y.posX - 105/2, 4, y.posY - 68/2);
+						
+						num[p].setLocalTranslation(y.posX - 105/2, 5, y.posY - 68/2);
 						
 						// Color active players blue
 						cube[p].setMaterial(mat);
