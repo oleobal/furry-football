@@ -6,6 +6,7 @@ import com.jme3.font.*;
 import com.jme3.input.ChaseCamera;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -61,9 +62,11 @@ public class FieldView extends SimpleApplication
 		smallCube = new Geometry("Sphere", smallBox);
 		
 		matActive.setColor("Color", ColorRGBA.Blue);
-		matInactive.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,1.f));
+		matInactive.setColor("Color", new ColorRGBA(1f,0.3f,0.3f,.5f));
+		matInactive.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		matPath.setColor("Color", ColorRGBA.Yellow);
 		matHeatmap.setColor("Color", ColorRGBA.Green);
+		matHeatmap.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		
 		smallCube.setMaterial(matPath);
 		
@@ -96,6 +99,7 @@ public class FieldView extends SimpleApplication
 			for (int i=0;i<105;i++)
 			{
 				Geometry thing = new Geometry("Parallelepipede Rectangle en anglais", new Box(.5f,.5f,.5f));
+				thing.setQueueBucket(Bucket.Transparent);
 				thing.setMaterial(matHeatmap);
 				thing.setLocalTranslation(i-52, 0, j-34);
 				heatmapNode.attachChild(thing);
@@ -349,10 +353,14 @@ public class FieldView extends SimpleApplication
 						
 						// Color active players blue
 						playerModel[p].setMaterial(matActive);
+						playerModel[p].setQueueBucket(Bucket.Inherit);
 					}
 					else
-						// Color inactive players red
+					{
+						// Color inactive players red and translucent
 						playerModel[p].setMaterial(matInactive);
+						playerModel[p].setQueueBucket(Bucket.Transparent);
+					}
 				}
 				if(!playbackPaused) i++;
 				timer -= playbackRate;
@@ -372,7 +380,7 @@ public class FieldView extends SimpleApplication
 					// transform space according to heat data
 					Spatial heat = heatmapNode.getChild(k);
 					Material mat = matHeatmap.clone();
-					mat.setColor("Color", new ColorRGBA((float)(heatmap[k%68][k/105])/m.getMaxHeat(),1 - (float)(heatmap[k%68][k/105])/m.getMaxHeat(),0.0f,1.f));
+					mat.setColor("Color", new ColorRGBA((float)(heatmap[k%68][k/105])/m.getMaxHeat(),1 - (float)(heatmap[k%68][k/105])/m.getMaxHeat(),0.0f,.5f));
 					heat.setLocalScale(1, 25*(heatmap[k%68][k/105]/(float)m.getMaxHeat()), 1);
 					heat.setMaterial(mat);
 					Vector3f trans = heat.getLocalTranslation();
