@@ -105,7 +105,7 @@ public class Game
 		Thermap m = new Thermap(2, g.getSnapshots());
 		System.out.println(m);*/
 		
-		MyFrame frame = new MyFrame("FootStats");
+		MyFrame frame = new MyFrame("Jurassic Stats");
 	}
 
 }

@@ -9,11 +9,17 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.*;
+import com.jme3.shadow.BasicShadowRenderer;
+import com.jme3.shadow.PssmShadowRenderer;
 import com.jme3.system.AppSettings;
 
 import footstats.model.*;
@@ -25,8 +31,9 @@ public class FieldView extends SimpleApplication
 {
 	private MyFrame theFrame;
 
+	private ChaseCamera chaseCam;
 	private Geometry cube1, cube2, cube3, smallCube;
-	private Geometry[] cube;
+	private Spatial[] cube;
 	private BitmapText[] num;
 	private Material mat, mat2, mat3, mat4;
 	private Node pathNode;
@@ -46,7 +53,8 @@ public class FieldView extends SimpleApplication
 		
 		
 		Box b = new Box(1, 1, 1);
-		cube1 = new Geometry("Box", b);
+
+		cube1 = new Geometry("LOL", new Mesh());
 		cube2 = cube1.clone();
 		cube3 = cube1.clone();
 		
@@ -70,6 +78,7 @@ public class FieldView extends SimpleApplication
 		
 		assetManager.registerLocator("stade.zip", ZipLocator.class);
 		Spatial field_geom = assetManager.loadModel("stade/soccer.obj");
+		field_geom.setShadowMode(ShadowMode.Receive);
 		Node field_node = new Node("field");
 		field_node.attachChild(field_geom);
 		rootNode.attachChild(field_node);
@@ -89,26 +98,34 @@ public class FieldView extends SimpleApplication
 		rootNode.attachChild(skybox);
 		viewPort.setBackgroundColor(new ColorRGBA(0.4f,0.5f,0.4f,1f));
 		
+		
 		BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
 		
-		cube = new Geometry[15];
+		
+				
+		cube = new Spatial[15];
 		num = new BitmapText[15];
 		for (int ko=0;ko<15;ko++)
 		{
 			Node playerNode = new Node("player"+ko);
 			num[ko]=new BitmapText(fnt, false);
 			num[ko].setBox(new Rectangle(0, 0, 6, 3));
-			num[ko].setLocalTranslation(ko*3,4,40);
+			num[ko].setLocalTranslation(ko*3,3,40);
 			num[ko].setQueueBucket(Bucket.Transparent);
 			num[ko].setSize(2.0f);
 			num[ko].setText(""+(ko+1));
 			
 			playerNode.attachChild(num[ko]);
 			
-			
-			cube[ko] = new Geometry("Box", b);
+			/*
+			cube[ko] = new Geometry("Box", b); */
+			//cube[ko] = assetManager.loadModel("stade/player.obj");
+			cube[ko] = assetManager.loadModel("stade/trex.obj");
+			//cube[ko] = assetManager.loadModel("stade/T-800.obj");
+			cube[ko].setLocalScale(0.5f);
 			cube[ko].setMaterial(mat);
-			cube[ko].setLocalTranslation(ko*3,1,40);
+			cube[ko].setShadowMode(ShadowMode.Cast);
+			cube[ko].setLocalTranslation(ko*3,0f,40);
 			playerNode.attachChild(cube[ko]);
 			rootNode.attachChild(playerNode);
 		}
@@ -120,14 +137,14 @@ public class FieldView extends SimpleApplication
 		
 		flyCam.setEnabled(false);
 		
-		ChaseCamera chaseCam = new ChaseCamera(cam, field_geom, inputManager);
+		chaseCam = new ChaseCamera(cam, field_geom, inputManager);
 		chaseCam.setDragToRotate(true);
 		
 		chaseCam.setInvertVerticalAxis(true);
 		chaseCam.setRotationSpeed(10);
 		chaseCam.setMinVerticalRotation((float) Math.PI/12);
 		chaseCam.setMaxVerticalRotation((float) (Math.PI/2));
-		chaseCam.setMinDistance(5f);
+		chaseCam.setMinDistance(30f);
 		chaseCam.setMaxDistance(150);
 		
 		// Default camera position and orientation
@@ -137,6 +154,33 @@ public class FieldView extends SimpleApplication
 		
 		chaseCam.setDownRotateOnCloseViewOnly(false);
 		chaseCam.setSmoothMotion(true);
+		
+		chaseCam.setSpatial(cube[0]);
+		
+		chaseCam.setLookAtOffset(new Vector3f(0, 0, 0));
+		
+
+		/*
+		BasicShadowRenderer bsr = new BasicShadowRenderer(assetManager, 256);
+		bsr.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
+		viewPort.addProcessor(bsr);
+		*/
+		
+		// if you want shadows uncomment this :
+		// but it's deprecated and resources-hungry so..
+		/*
+		PssmShadowRenderer pssmRenderer = new PssmShadowRenderer(assetManager,1024,4);
+		pssmRenderer.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
+		viewPort.addProcessor(pssmRenderer);
+		*/
+		
+		
+		/*
+		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+		SSAOFilter ssaoFilter = new SSAOFilter(12.94f, 43.92f, 0.33f, 0.61f);
+		fpp.addFilter(ssaoFilter);
+		viewPort.addProcessor(fpp);
+		*/
 		
 		playbackRate = 50;
 		playbackPaused = true;
@@ -204,6 +248,7 @@ public class FieldView extends SimpleApplication
 	@Override
 	public void simpleUpdate(float tpf)
 	{	
+		
 		for(BitmapText label : num)
 		{
 			// Make quaternion that looks at the cam to rotate the text to face the screen
@@ -240,22 +285,25 @@ public class FieldView extends SimpleApplication
 						if (pathsDrawn)
 						{
 							Geometry lol = smallCube.clone();
-							try //FIXME this doesn't actually work, just prevent the thing from crashing
+							try
 							{
 								pathNode.attachChild(lol);
 							}
 							catch (NullPointerException e)
 							{
 								//System.err.println("God dammit");
-								// now it's intentional !
+								// now it's intentional ! No more errors !
 								pathNode = new Node("paths");
 								rootNode.attachChild(pathNode);
 								pathNode.attachChild(lol);
 							}
-							lol.setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
+							lol.setLocalTranslation(y.posX - 105/2, 0.1f, y.posY - 68/2);
 						}
 						// transform shapes
-						cube[p].setLocalTranslation(y.posX - 105/2, 1, y.posY - 68/2);
+						cube[p].setLocalTranslation(y.posX - 105/2, 0f, y.posY - 68/2);
+						Quaternion heading = new Quaternion(new float[]{0, y.heading, 0});//(float) (y.heading + Math.PI/2), 0}); //FIXME: not sure
+						cube[p].setLocalRotation(heading);
+						cube[p].setShadowMode(ShadowMode.Cast);
 						num[p].setLocalTranslation(y.posX - 105/2, 4, y.posY - 68/2);
 						
 						// Color active players blue
