@@ -35,7 +35,7 @@ public class FieldView extends SimpleApplication
 	private int i;
 	private float timer;
 	int playbackRate;
-	boolean playbackPaused, pathsDrawn;
+	boolean playbackPaused, pathsDrawn, removeDrawnPaths;
 	
 	@Override
 	public void simpleInitApp()
@@ -50,8 +50,8 @@ public class FieldView extends SimpleApplication
 		cube2 = cube1.clone();
 		cube3 = cube1.clone();
 		
-		Box smallBox = new Box(0.2f,0.2f,0.2f); //it's not my fault if I only know how to make cubes
-		smallCube = new Geometry("Box", smallBox);
+		Sphere smallBox = new Sphere(10, 10, 0.1f, true, true);//new Box(0.2f,0.2f,0.2f); //it's not my fault if I only know how to make cubes
+		smallCube = new Geometry("Sphere", smallBox);
 		
 		mat.setColor("Color", ColorRGBA.Blue);
 		cube1.setMaterial(mat);
@@ -141,6 +141,7 @@ public class FieldView extends SimpleApplication
 		playbackRate = 50;
 		playbackPaused = true;
 		pathsDrawn = false;
+		removeDrawnPaths = false;
 		
 		game = null;
 		i = 0;
@@ -171,6 +172,7 @@ public class FieldView extends SimpleApplication
 		if (time>game.getSnapshotCount())
 			i=game.getSnapshotCount();
 		i = time;
+		
 	}
 	
 	public void giveFrame(MyFrame frame)
@@ -187,10 +189,16 @@ public class FieldView extends SimpleApplication
 	{
 		pathsDrawn ^= true;
 		if (!pathsDrawn)
+			removeDrawnPaths = true;
+		/*
+		if (!pathsDrawn)
 		{
 			pathNode.removeFromParent();
-			pathNode = new Node("paths");
+			pathNode = null;
+			//pathNode = new Node("paths");
+			//rootNode.attachChild(pathNode);
 		}
+		*/
 	}
 	
 	@Override
@@ -202,6 +210,20 @@ public class FieldView extends SimpleApplication
 			Quaternion q = new Quaternion();
 			q.lookAt(cam.getLocation(), cam.getUp());
 			label.setLocalRotation(q);
+		}
+		
+		if (removeDrawnPaths)
+		{
+			removeDrawnPaths = false;
+			try
+			{
+				pathNode.removeFromParent();
+				pathNode = null;
+			}
+			catch (Exception e)
+			{
+				System.err.println("pathNode exception, please ask Jean-Marc for help");
+			}
 		}
 		
 		if (game != null)
@@ -224,7 +246,8 @@ public class FieldView extends SimpleApplication
 							}
 							catch (NullPointerException e)
 							{
-								System.err.println("God dammit");
+								//System.err.println("God dammit");
+								// now it's intentional !
 								pathNode = new Node("paths");
 								rootNode.attachChild(pathNode);
 								pathNode.attachChild(lol);

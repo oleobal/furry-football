@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -30,6 +31,8 @@ public class MyFrame extends JFrame
 	FieldView threeDview;
 	Canvas    canvas;
 
+	boolean buttonsEnabled;
+	
 	public MyFrame(String title)
 	{
 		super(title);
@@ -37,6 +40,8 @@ public class MyFrame extends JFrame
 		this.setResizable(true);
 		this.setLocation(200,200);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		buttonsEnabled=false;
 		
 		JPanel contentPane = new JPanel(new BorderLayout());
 		trianglePane  = new JPanel();
@@ -54,7 +59,7 @@ public class MyFrame extends JFrame
 		settingsPane = new JPanel();
 		//settingsPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 		settingsPane.setBorder(null);
-		settingsPane.setPreferredSize(new Dimension(0,75)); //on dirait pas mais ça marche en fait TODO: gros bricolage
+		settingsPane.setPreferredSize(new Dimension(0,75)); //on dirait pas mais ï¿½a marche en fait TODO: gros bricolage
 		
 		checkBoxPath = new JCheckBox("Paths");
 		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
@@ -94,28 +99,45 @@ public class MyFrame extends JFrame
 		buttonLoad.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				// Open file chooser to current directory
-				JFileChooser fc = new JFileChooser(".");
+				JFileChooser fc = new JFileChooser("./data");
 				int returnVal = fc.showOpenDialog(MyFrame.this);
 
 		        if (returnVal == JFileChooser.APPROVE_OPTION)
 		        {
+		        	
 		        	File gameFile = fc.getSelectedFile();
 		        	try
 		        	{
+		        		/*
+		        		Thread t = new Thread(new Runnable(){
+		                    public void run(){
+				        		JOptionPane.showMessageDialog(MyFrame.this, "Loading your file" , "Loading", JOptionPane.INFORMATION_MESSAGE, new ImageIcon("loading.gif"));//new ImageIcon(ImageIO.read(new File("loading.gif")).getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
+		                    }
+		                });
+		            	t.start(); */
 		            	threeDview.setGame(new Game(gameFile.getPath()));
-			        } catch (FileNotFoundException e) {
+		            	
+		            	
+
+			        }
+		        	catch (FileNotFoundException e)
+		        	{
 						System.err.println("Couldn't find file " + gameFile.getName());
 						JOptionPane.showMessageDialog(MyFrame.this,
 							    "Couldn't find file " + gameFile.getName(),
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
-					} catch (IOException e) {
+					}
+		        	catch (IOException e)
+		        	{
 						System.err.println(e.getMessage());
 						JOptionPane.showMessageDialog(MyFrame.this,
 							    e.getMessage(),
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
-					} catch (ParseException e) {
+					}
+		        	catch (ParseException e)
+		        	{
 						System.err.println(e.getMessage());
 						JOptionPane.showMessageDialog(MyFrame.this,
 							    "Unsupported file format for file " + gameFile.getName(),
@@ -186,89 +208,87 @@ public class MyFrame extends JFrame
 	 */
 	private void enableButtons()
 	{
-		
-		buttonPlay.addActionListener(new ActionListener()
+		if (!buttonsEnabled)
 		{
+			buttonsEnabled = true;
+			
+			
+			buttonPlay.addActionListener(new ActionListener()
+			{
+					public void actionPerformed(ActionEvent e)
+					{
+						threeDview.playPause();
+						if(buttonPlay.getText().equals("II"))
+						{
+							buttonPlay.setText(">");
+						}
+						else
+						{
+							buttonPlay.setText("II");
+						}
+					}
+			});
+			
+			
+			
+			
+			
+			buttonFastForward.addActionListener(new ActionListener()
+			{	
 				public void actionPerformed(ActionEvent e)
 				{
-					threeDview.playPause();
-					if(buttonPlay.getText().equals("II"))
+					if (threeDview.playbackRate>3)
 					{
-						buttonPlay.setText(">");
+						threeDview.playbackRate*=0.5;
 					}
+					if ((int)(50.0/(float)threeDview.playbackRate) == 0)
+						labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
 					else
+						labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
+					//System.err.println(threeDview.playbackRate);
+				}
+			});
+			
+			
+			
+			
+			
+			buttonSlowDown.addActionListener(new ActionListener()
+			{	
+				public void actionPerformed(ActionEvent e)
+				{
+					if (threeDview.playbackRate>1 && threeDview.playbackRate<800)
 					{
-						buttonPlay.setText("II");
+						
+						if (threeDview.playbackRate==12) //ahem
+							threeDview.playbackRate=25;
+						else
+							threeDview.playbackRate*=2;
 					}
-				}
-		});
-		
-		
-		
-		
-		
-		buttonFastForward.addActionListener(new ActionListener()
-		{	
-			public void actionPerformed(ActionEvent e)
-			{
-				if (threeDview.playbackRate>3)
-				{
-					threeDview.playbackRate*=0.5;
-				}
-				if ((int)(50.0/(float)threeDview.playbackRate) == 0)
-					labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
-				else
-					labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
-				//System.err.println(threeDview.playbackRate);
-			}
-		});
-		
-		
-		
-		
-		
-		buttonSlowDown.addActionListener(new ActionListener()
-		{	
-			public void actionPerformed(ActionEvent e)
-			{
-				if (threeDview.playbackRate>1 && threeDview.playbackRate<800)
-				{
-					
-					if (threeDview.playbackRate==12) //ahem
-						threeDview.playbackRate=25;
+					else if (threeDview.playbackRate == 1)
+					{
+						threeDview.playbackRate=3;
+					}
+					if ((int)(50.0/(float)threeDview.playbackRate) == 0)
+						labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
 					else
-						threeDview.playbackRate*=2;
+						labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
+					//System.err.println(threeDview.playbackRate);
 				}
-				else if (threeDview.playbackRate == 1)
-				{
-					threeDview.playbackRate=3;
-				}
-				if ((int)(50.0/(float)threeDview.playbackRate) == 0)
-					labelSpeed.setText(new DecimalFormat("#.##").format((50.0/(float)threeDview.playbackRate))+"x");
-				else
-					labelSpeed.setText((int)(50.0/(float)threeDview.playbackRate)+"x");
-				//System.err.println(threeDview.playbackRate);
-			}
-		});
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		sliderProgress.addChangeListener(new ChangeListener()
-		{
-			public void stateChanged(ChangeEvent e)
+			});
+			
+			
+			
+			
+			
+			sliderProgress.addChangeListener(new ChangeListener()
 			{
-				threeDview.setTime(sliderProgress.getValue());			
-			} 
-		});
-		
+				public void stateChanged(ChangeEvent e)
+				{
+					threeDview.setTime(sliderProgress.getValue());	
+				} 
+			});
+		}
 		
 		
 	}
