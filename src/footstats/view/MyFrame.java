@@ -63,7 +63,7 @@ public class MyFrame extends JFrame
 		settingsPane.setLayout(new BoxLayout(settingsPane, BoxLayout.Y_AXIS));
 		
 		// Checkbox for toggling path drawing
-		checkBoxPath = new JCheckBox("Paths");
+		checkBoxPath = new JCheckBox("Show paths");
 		checkBoxPath.setEnabled(false);
 		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
 			public void itemStateChanged(ItemEvent e)
@@ -122,7 +122,7 @@ public class MyFrame extends JFrame
 		buttonHelp.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
 			{
-				JOptionPane.showMessageDialog(MyFrame.this, "Use the LOAD button to select a file. They're in the data/ folder.\n\nOnce a file is being played:\nBlue icons are players, red icons means a player who's been lost.\n\nYou can use the Play Faster/Slower buttons and the progress bar at the bottom to play out the match as you like.\n\nYou can hold down the left mouse button to drag the camera around the field.", "Help", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(MyFrame.this, "Use the LOAD button to select a file.\n\nOnce a file is being played:\n\nBlue icons are players, red icons means a player who's been lost.\n\nYou can use the Play Faster/Slower buttons and the progress bar at the bottom to manage speed.\n\nYou can use the \"Show paths\" toggle to draw the paths players take.\n\nYou can use \"Camera\" to select a player to follow.\n\nYou can hold down the left mouse button to drag the camera around the field.", "Help", JOptionPane.INFORMATION_MESSAGE);
 				
 			}
 		});
