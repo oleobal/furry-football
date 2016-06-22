@@ -64,6 +64,7 @@ public class MyFrame extends JFrame
 		
 		// Checkbox for toggling path drawing
 		checkBoxPath = new JCheckBox("Show paths");
+		checkBoxPath.setToolTipText("Whether to show the paths the players take");
 		checkBoxPath.setEnabled(false);
 		checkBoxPath.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
 			public void itemStateChanged(ItemEvent e)
@@ -74,6 +75,7 @@ public class MyFrame extends JFrame
 		});
 		
 		checkBoxHeat = new JCheckBox("Player heatmap");
+		checkBoxHeat.setToolTipText("Whether to enable the selected player's heatmap, showing where he has spent the most time.");
 		checkBoxHeat.setEnabled(false);
 		checkBoxHeat.addItemListener(new ItemListener(){ //that's what is in the javadoc, who am I to contradict Sun ?
 			public void itemStateChanged(ItemEvent e)
@@ -99,6 +101,7 @@ public class MyFrame extends JFrame
 		
 		// Yay for action listener
 		checkBoxVisible = new JCheckBox("Player visible");
+		checkBoxVisible.setToolTipText("Whether the selected player should be visible.");
 		checkBoxVisible.setEnabled(false);
 		checkBoxVisible.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e)
@@ -117,11 +120,13 @@ public class MyFrame extends JFrame
 		
 		// Camera focus settings
 		buttonPreviousPlayer = new JButton("<");
+		buttonPreviousPlayer.setToolTipText("Focus on the previous player.");
 		buttonPreviousPlayer.setEnabled(false);
 		buttonPreviousPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
 		buttonPreviousPlayer.setPreferredSize(new Dimension(20,20));
 		buttonPreviousPlayer.setMargin(new Insets(0,0,0,0));
 		buttonNextPlayer = new JButton(">");
+		buttonPreviousPlayer.setToolTipText("Focus on the next player.");
 		buttonNextPlayer.setEnabled(false);
 		buttonNextPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
 		buttonNextPlayer.setPreferredSize(new Dimension(20,20));
@@ -136,12 +141,14 @@ public class MyFrame extends JFrame
 		settingsFollowPane.add(buttonNextPlayer);
 		
 		settingsPane.add(checkBoxPath);
+		settingsPane.add(new JSeparator());
 		settingsPane.add(settingsFollowPane);
 		settingsPane.add(checkBoxVisible);
 		settingsPane.add(checkBoxHeat);
 		
 		// Main controls (play, faster, slower)
 		buttonPlay = new JButton(">");
+		buttonPlay.setToolTipText("Pause or resume.");
 		buttonPlay.setEnabled(false);
 		buttonPlay.setFont(new Font("Arial", Font.PLAIN, 40));
 		buttonPlay.setPreferredSize(new Dimension(70,50));
@@ -172,6 +179,7 @@ public class MyFrame extends JFrame
 		});
 		
 		buttonLoad = new JButton("LOAD");
+		buttonLoad.setToolTipText("Choose a CSV file to read.");
 		buttonLoad.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -391,6 +399,7 @@ public class MyFrame extends JFrame
 						{
 							labelPlayer.setText("#");
 							checkBoxHeat.setEnabled(false);
+							checkBoxHeat.setSelected(false);
 							threeDview.showHeatmap(0);
 							checkBoxVisible.setEnabled(false);
 							threeDview.followPlayer(0);

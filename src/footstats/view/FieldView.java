@@ -307,11 +307,15 @@ public class FieldView extends SimpleApplication
 		if (playerID == 0)
 		{
 			for (int i=0;i<15;i++)
+			{
 				playerVisible[i]=true;
+				(rootNode.getChild("player"+i)).setCullHint(CullHint.Inherit);
+			}
 		}
 		else
 		{
 			playerVisible[playerID-1] = true;
+			(rootNode.getChild("player"+(playerID-1))).setCullHint(CullHint.Inherit);
 		}
 		
 	}
@@ -329,11 +333,16 @@ public class FieldView extends SimpleApplication
 		if (playerID == 0)
 		{
 			for (int i=0;i<15;i++)
+			{
 				playerVisible[i]=false;
+				(rootNode.getChild("player"+i)).setCullHint(CullHint.Always);
+			}
+			
 		}
 		else
 		{
 			playerVisible[playerID-1] = false;
+			(rootNode.getChild("player"+(playerID-1))).setCullHint(CullHint.Always);
 		}
 		
 	}
@@ -424,6 +433,7 @@ public class FieldView extends SimpleApplication
 							playerModel[p].setQueueBucket(Bucket.Transparent);
 						}
 					}
+				
 				}
 				if(!playbackPaused) i++;
 				timer -= playbackRate;
