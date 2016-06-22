@@ -97,11 +97,11 @@ public class MyFrame extends JFrame
 			
 		});
 		
-		//on pourrait le faire en CardLayout mais bon..
+		// Yay for action listener
 		checkBoxVisible = new JCheckBox("Player visible");
 		checkBoxVisible.setEnabled(false);
-		checkBoxVisible.addItemListener(new ItemListener(){
-			public void itemStateChanged(ItemEvent e)
+		checkBoxVisible.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e)
 			{
 				if (!labelPlayer.getText().equals("#"))
 				{
