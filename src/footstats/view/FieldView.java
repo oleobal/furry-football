@@ -34,8 +34,9 @@ public class FieldView extends SimpleApplication
 
 	private ChaseCamera chaseCam;
 	private Geometry smallCube;
-	private Spatial[] cube;
 	private Spatial field_geom;
+	private Spatial[] playerModel;
+	private Thermap[] heatmap;
 	private BitmapText[] num;
 	private Material matActive, matInactive, matPath, matHeatmap;
 	private Node pathNode, heatmapNode;
@@ -45,6 +46,7 @@ public class FieldView extends SimpleApplication
 	private float timer;
 	int playbackRate;
 	boolean playbackPaused, pathsDrawn, removeDrawnPaths;
+	int playerHeatmap;
 	
 	@Override
 	public void simpleInitApp()
@@ -93,15 +95,15 @@ public class FieldView extends SimpleApplication
 		{
 			for (int i=0;i<105;i++)
 			{
-				Geometry thing = new Geometry("Parallelepipede Rectangle en anglais", new Box(1,1,1));
+				Geometry thing = new Geometry("Parallelepipede Rectangle en anglais", new Box(.5f,.5f,.5f));
 				thing.setMaterial(matHeatmap);
-				thing.setLocalTranslation(i-52, 1, j-34);
+				thing.setLocalTranslation(i-52, 0, j-34);
 				heatmapNode.attachChild(thing);
 			}
 		}
 		rootNode.attachChild(heatmapNode);
 				
-		cube = new Spatial[15];
+		playerModel = new Spatial[15];
 		num = new BitmapText[15];
 		for (int ko=0;ko<15;ko++)
 		{
@@ -118,14 +120,14 @@ public class FieldView extends SimpleApplication
 			/*
 			cube[ko] = new Geometry("Box", b); */
 			//cube[ko] = assetManager.loadModel("stade/player.obj");
-			cube[ko] = assetManager.loadModel("stade/trex.obj");
+			playerModel[ko] = assetManager.loadModel("stade/trex.obj");
 			//cube[ko] = assetManager.loadModel("stade/T-800.obj");
-			cube[ko].setLocalScale(0.7f);
-			cube[ko].setMaterial(matActive);
-			cube[ko].setShadowMode(ShadowMode.Cast);
-			cube[ko].setLocalTranslation(ko*3,0f,40);
-			cube[ko].setLocalRotation(new Quaternion().fromAngles(0, (float)Math.PI, 0)); // make them start facing the field
-			playerNode.attachChild(cube[ko]);
+			playerModel[ko].setLocalScale(0.7f);
+			playerModel[ko].setMaterial(matActive);
+			playerModel[ko].setShadowMode(ShadowMode.Cast);
+			playerModel[ko].setLocalTranslation(ko*3,0f,40);
+			playerModel[ko].setLocalRotation(new Quaternion().fromAngles(0, (float)Math.PI, 0)); // make them start facing the field
+			playerNode.attachChild(playerModel[ko]);
 			rootNode.attachChild(playerNode);
 		}
 		
@@ -183,6 +185,7 @@ public class FieldView extends SimpleApplication
 		playbackPaused = true;
 		pathsDrawn = false;
 		removeDrawnPaths = false;
+		playerHeatmap = 0;
 		
 		game = null;
 		i = 0;
@@ -204,6 +207,12 @@ public class FieldView extends SimpleApplication
 		theFrame.sliderProgress.setMaximum(game.getSnapshotCount());
 		theFrame.sliderProgress.setMinimum(0);
 		theFrame.sliderProgress.setValue(0);
+		
+		heatmap = new Thermap[15];
+		for(int k = 0; k<15; k++)
+		{
+			heatmap[k] = new Thermap(k+1, this.game.getSnapshots());
+		}
 	}
 	
 	public void setTime(int time)
@@ -259,8 +268,8 @@ public class FieldView extends SimpleApplication
 		
 		else
 		{
-			chaseCam.setSpatial(cube[playerID-1]);
-			
+			chaseCam.setSpatial(playerModel[playerID-1]);
+			if(playerHeatmap != 0) playerHeatmap = playerID;
 		}
 		
 	}
@@ -276,30 +285,7 @@ public class FieldView extends SimpleApplication
 		if (playerID>15)
 			playerID=15;
 		
-		if (playerID == 0)
-		{
-			if (heatmapNode != null)
-			{
-				heatmapNode.setCullHint(CullHint.Always);
-			}
-		}
-		else
-		{
-			System.err.println("LOLOL");
-			Thermap m = new Thermap(playerID-1, this.game.getSnapshots());
-			//int terrainScale = 70;
-			
-			int[][] heatmap = m.getMap();
-			for (int i=0;i<105*68;i++)
-			{
-				Spatial heat = heatmapNode.getChild(i);
-				heat.setLocalScale(1, 25*(heatmap[i%68][i/105]/(float)m.getMaxHeat()), 1);
-				heat.setLocalTranslation(0,heatmap[i%68][i/105]/2,0);
-				System.out.println(heatmap[i%68][i/105]);
-				matHeatmap.setColor("Color", new ColorRGBA(heatmap[i%68][i/105]/((float)m.getMaxHeat()),0,0,1));
-			}
-			heatmapNode.setCullHint(CullHint.Inherit);
-		}
+		playerHeatmap = playerID;
 	}
 	
 	@Override
@@ -355,18 +341,18 @@ public class FieldView extends SimpleApplication
 							lol.setLocalTranslation(y.posX - 105/2, 0.1f, y.posY - 68/2);
 						}
 						// transform shapes
-						cube[p].setLocalTranslation(y.posX - 105/2, 0f, y.posY - 68/2);
-						cube[p].setLocalRotation(new Quaternion().fromAngles(0, y.heading, 0));
-						cube[p].setShadowMode(ShadowMode.Cast);
+						playerModel[p].setLocalTranslation(y.posX - 105/2, 0f, y.posY - 68/2);
+						playerModel[p].setLocalRotation(new Quaternion().fromAngles(0, y.heading, 0));
+						playerModel[p].setShadowMode(ShadowMode.Cast);
 						
 						num[p].setLocalTranslation(y.posX - 105/2, 5, y.posY - 68/2);
 						
 						// Color active players blue
-						cube[p].setMaterial(matActive);
+						playerModel[p].setMaterial(matActive);
 					}
 					else
 						// Color inactive players red
-						cube[p].setMaterial(matInactive);
+						playerModel[p].setMaterial(matInactive);
 				}
 				if(!playbackPaused) i++;
 				timer -= playbackRate;
@@ -374,6 +360,34 @@ public class FieldView extends SimpleApplication
 				theFrame.sliderProgress.setValue(i);
 			}
 			timer += 1000*tpf;
+			
+			if(playerHeatmap != 0)
+			{
+				Thermap m = heatmap[playerHeatmap-1];
+				//int terrainScale = 70;
+				
+				int[][] heatmap = m.getMap();
+				for (int k=0;k<105*68;k++)
+				{
+					// transform space according to heat data
+					Spatial heat = heatmapNode.getChild(k);
+					Material mat = matHeatmap.clone();
+					mat.setColor("Color", new ColorRGBA((float)(heatmap[k%68][k/105])/m.getMaxHeat(),1 - (float)(heatmap[k%68][k/105])/m.getMaxHeat(),0.0f,1.f));
+					heat.setLocalScale(1, 25*(heatmap[k%68][k/105]/(float)m.getMaxHeat()), 1);
+					heat.setMaterial(mat);
+					Vector3f trans = heat.getLocalTranslation();
+					heat.setLocalTranslation(trans.x,25*(heatmap[k%68][k/105]/(float)m.getMaxHeat())/2, trans.z);
+					
+					// hide spaces where heat is zero
+					if(heatmap[k%68][k/105] == 0) heat.setCullHint(CullHint.Always);
+					else  						  heat.setCullHint(CullHint.Inherit);
+				}
+				heatmapNode.setCullHint(CullHint.Inherit);
+			}
+			else
+			{
+				heatmapNode.setCullHint(CullHint.Always);
+			}
 		}
 	}
 }
