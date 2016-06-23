@@ -131,8 +131,10 @@ public class MyFrame extends JFrame
 		buttonNextPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
 		buttonNextPlayer.setPreferredSize(new Dimension(20,20));
 		buttonNextPlayer.setMargin(new Insets(0,0,0,0));
-		labelPlayer = new JLabel("#");
-	
+		labelPlayer = new JLabel("#",SwingConstants.CENTER);
+		//System.err.println("LOLOLOLOLOL "+labelPlayer.getPreferredSize());
+		labelPlayer.setPreferredSize(new Dimension(25,15));
+		labelPlayer.setMinimumSize(new Dimension(25,15));
 		
 		settingsFollowPane = new JPanel();
 		settingsFollowPane.add(new JLabel("Focus:"));
