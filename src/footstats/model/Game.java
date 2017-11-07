@@ -105,6 +105,8 @@ public class Game
 		Thermap m = new Thermap(2, g.getSnapshots());
 		System.out.println(m);*/
 		
+		Object lol = new Object();
+		System.out.println(lol instanceof Cloneable);
 		MyFrame frame = new MyFrame("Jurassic Stats");
 	}
 

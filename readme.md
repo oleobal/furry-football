@@ -1,9 +1,3 @@
-FIFA, now as a school project !
+A school project reading data on football players positions & orientations during a match, and then using JMonkeyEngine to display them in a 3D view as dinosaurs.
 
-Except it's not a game.
-
-###IT'S NOT A GAME !
-
-I hate projects.
-
-
+![Screenshot](screenshot.png)
